@@ -1,0 +1,198 @@
+#!/bin/bash
+# Exercise 1: First Scripts and Environment
+# Topics: Shebang, variables, command substitution, exit codes, functions
+
+# ==============================================================================
+# EXERCISE OVERVIEW
+# ==============================================================================
+# This exercise reinforces fundamental Bash scripting concepts:
+# - Script structure with proper shebang
+# - Variable declaration and usage
+# - Command substitution
+# - Exit codes and error handling
+# - User input and positional parameters
+# ==============================================================================
+
+# ==============================================================================
+# TODO 1: Set Error Handling
+# ==============================================================================
+# Configure how the script handles errors and unassigned variables.
+# 
+# Beginners: Leave this section blank for now so minor typos don't 
+# crash your script completely while you are building it.
+#
+# Advanced: Enable strict error handling flags to catch bugs early.
+# Hint: Use 'set -euo pipefail'
+# Note: If enabled, ensure you handle empty inputs safely in TODO 7!
+
+# TODO: Add your code here
+
+
+# ==============================================================================
+# TODO 2: Define Variables
+# ==============================================================================
+# Create the following variables:
+# - SCRIPT_NAME: Name of this script (use $0)
+# - CURRENT_USER: Current username (use $USER or whoami)
+# - CURRENT_DATE: Current date in format "YYYY-MM-DD" 
+# - HOME_DIR: User's home directory (use $HOME)
+
+# Hint for Beginners: Use command substitution $(command) to capture output.
+# Example: CURRENT_DATE=$(date +%Y-%m-%d)
+# TODO: Add your code here
+
+
+# ==============================================================================
+# TODO 3: Display Welcome Message
+# ==============================================================================
+# Print a welcome message that includes:
+# - Script name
+# - Current user
+# - Current date
+# Use echo with proper variable substitution. Remember to quote your variables!
+
+# TODO: Add your code here
+
+
+# ==============================================================================
+# TODO 4: System Information Function
+# ==============================================================================
+# Create a function called get_system_info() that displays:
+# - Hostname (use hostname command)
+# - Operating system (use uname -s)
+# - Kernel version (use uname -r)
+# - Number of CPUs
+
+# Cross-Platform Warning: 'nproc' works on Linux, but macOS requires 'sysctl -n hw.ncpu'.
+# Hint for Beginners: Just hardcode the command for your current OS.
+# Challenge for Advanced: Use an if/else block to check the OS type and run the correct command.
+
+get_system_info() {
+    # TODO: Add your code here
+    echo "TODO: Implement get_system_info function"
+}
+
+# ==============================================================================
+# TODO 5: File Count Function
+# ==============================================================================
+# Create a function called count_files() that evaluates a directory:
+# - Takes a directory path as an argument ($1)
+
+# Hint for Beginners: 
+#   Just print the total number of items in the directory.
+#   Command hint: ls -1 "$1" | wc -l
+#
+# Challenge for Advanced: 
+#   1. Check if the directory actually exists. If it doesn't, print an error and return 1.
+#   2. Separately count files and directories (do not include subdirectories).
+#   3. Return 0 on success.
+
+count_files() {
+    # TODO: Add your code here
+    echo "TODO: Implement count_files function"
+}
+
+# ==============================================================================
+# TODO 6: Disk Usage Function
+# ==============================================================================
+# Create a function called check_disk_usage() that checks the root filesystem (/).
+#
+# Hint for Beginners: 
+#   Simply run the 'df -h /' command to display the usage chart to the user.
+#
+# Challenge for Advanced: 
+#   Parse the output of 'df /' to extract *only* the numerical percentage used.
+#   Print the percentage, and if it is above 80%, print a custom "WARNING" message.
+#   Tools hint: awk, sed, cut, or bash string manipulation.
+
+check_disk_usage() {
+    # TODO: Add your code here
+    echo "TODO: Implement check_disk_usage function"
+}
+
+# ==============================================================================
+# TODO 7: User Input
+# ==============================================================================
+# Prompt the user to enter a directory path and store it in USER_DIR.
+# If the user presses Enter without typing anything, default to the current directory (.).
+#
+# Hint for Beginners: Use 'read -p "Prompt text: " USER_DIR'. 
+#                    Use a standard if/else block to check if it's empty.
+#
+# Challenge for Advanced: If you used 'set -u' in TODO 1, standard empty checks might 
+#                        throw an error. Use parameter expansion like ${USER_DIR:-.}
+
+# TODO: Add your code here
+
+# ==============================================================================
+# TODO 8: Call Your Functions
+# ==============================================================================
+# Execute the logic of your script by calling your functions in this order:
+# 1. get_system_info
+# 2. count_files (passing USER_DIR as the argument)
+# 3. check_disk_usage
+
+# TODO: Add your code here
+
+
+# ==============================================================================
+# TODO 9: Exit Status
+# ==============================================================================
+# Explicitly exit the script with a successful status code.
+# Hint: exit 0
+
+# TODO: Add your code here
+
+
+# ==============================================================================
+# TESTING YOUR SCRIPT
+# ==============================================================================
+# After completing all TODOs, test your script in your termianl:
+#
+# 1. Make it executable:
+#    chmod +x 01_first_scripts.sh
+#
+# 2. Run the script normally:
+#    ./01_first_scripts.sh
+#
+# 3. Test what happens when you hit 'Enter' at the directory prompt. 
+#
+# 4. Check the script's exit status immediately after it finnishes:
+#    echo $? 
+#   (should print 0)
+#
+# 5. Advanced check: Run your script through a shellcheck to find hidden bugs: 
+#    shellcheck 01_first_scripts.sh
+#
+# ==============================================================================
+# EXPECTED OUTPUT (example configuration)
+# ==============================================================================
+# Welcome to 01_first_scripts.sh
+# Running as user: student - Add your name here.
+# Current date: 2026-3-18 - Update the date.
+#
+# === System Information ===
+# Hostname: dev-box-1
+# OS: Linux
+# Kernel: 6.8.0-generic
+# CPUs: 4
+#
+# Enter a directory path (Press Enger for current dir): /tmp
+#
+# === File Count in /tmp ===
+# Items found: 42
+#
+# === Disk Usage ===
+# Filesystem     Size    Used  Avail  Use%  Mounted on
+# /dev/sda1      50G     12G   36G     25%  /
+# Disk usage is normal
+#
+# ==============================================================================
+# BONUS CHALLENGES - if you have time after other exercises are complete.
+# ==============================================================================
+# 1. Add colorized terminal output using ANSI escape codes (e.g., Green for success, Red for warnings).
+# 2. Create a pre-flight check function that verifies if required commands ('wc', 'df', 'awk') exist before running.
+# 3. Add command-line flag parsing. If the script is run as './script.sh -h', display a help menu instead.
+# 4. Log all output to a file (e.g., script_run.log) using the 'tee' command while still displaying it on the screen.
+# 5. Advanced Logic: In TODO 5, count regular files vs. directories completely separately using loops or find flags.
+# ==============================================================================
