@@ -1,0 +1,233 @@
+#!/bin/bash
+# Exercise 2: File System Navigation and Analysis
+# Topics: File operations, pipes, redirection, grep/awk/sed
+# Duration: 45 minutes
+
+# ==============================================================================
+# EXERCISE OVERVIEW
+# ==============================================================================
+# This exercise focuses on file system operations and text processing:
+# - Creating and manipulating files/directories
+# - Using pipes and redirection operators (>, >>, |)
+# - Text processing with grep, awk, and sed
+# - Automated log file analysis
+# ==============================================================================
+
+# Global Configurations
+EXERCISE_DIR="exercise02_workspace"
+LOG_FILE="${EXERCISE_DIR}/system.log"
+
+# ==============================================================================
+# TODO 1: Environment and Setup Workspace
+# ==============================================================================
+# Task: Create a function called setup_workspace() that ensures the target 
+# sandbox folder exists and populates it with your initial log sample.
+#
+# Advanced Configuration: 
+#   If you are an advanced user, uncomment the strict line directly below.
+#   Note: If enabled, be careful with grep pipelines that might return 0 matches!
+#   # set -euo pipefail
+
+create_sample_log() {
+    cat > "${LOG_FILE}" << 'EOF'
+2025-11-30 08:15:23 INFO Server started successfully
+2025-11-30 08:15:45 INFO Database connection established
+2025-11-30 08:16:12 WARNING High memory usage detected: 85%
+2025-11-30 08:17:03 ERROR Failed to connect to API endpoint
+2025-11-30 08:17:15 INFO Retrying connection...
+2025-11-30 08:17:23 INFO Connection successful
+2025-11-30 08:18:45 WARNING Disk usage above threshold: 92%
+2025-11-30 08:19:12 ERROR Database query timeout
+2025-11-30 08:19:30 CRITICAL System crash detected
+2025-11-30 08:20:00 INFO System recovery initiated
+2025-11-30 08:21:15 INFO All services restored
+2025-11-30 08:22:00 WARNING Cache memory low
+EOF
+}
+
+setup_workspace() {
+    # TODO: Create the directory defined by $EXERCISE_DIR if it doesn't exist yet, 
+    # then invoke the create_sample_log function to generate the log.
+    
+    echo "TODO: Implement setup_workspace"
+}
+
+
+# ==============================================================================
+# TODO 2: Count Log Levels
+# ==============================================================================
+# Task: Create a function called count_log_levels() that scans the log file
+# and counts how many INFO, WARNING, ERROR, and CRITICAL entries exist.
+#
+# Hint for Beginners: 
+#   Run separate 'grep -c' commands sequentially for each individual level string.
+#   Example: grep -c "INFO" "${LOG_FILE}"
+#
+# Challenge for Advanced: 
+#   Consolidate your output using a standard 'for' loop to iterate through the levels 
+#   or use 'awk' to build an associative array aggregation printout.
+
+count_log_levels() {
+    # TODO: Add your code here
+    echo "TODO: Implement count_log_levels"
+}
+
+
+# ==============================================================================
+# TODO 3: Extract Errors
+# ==============================================================================
+# Task: Create a function called extract_errors() that filters critical failures.
+# - Find all lines containing "ERROR" or "CRITICAL".
+# - Save these lines into a separate destination file: exercise02_workspace/errors.log
+# - Display a console message summarizing how many errors were discovered.
+#
+# Hint for Beginners: Use extended grep matching ('grep -E "A|B"') combined with 
+#                    a output redirection operator (>) to write to the file.
+#
+# Challenge for Advanced: Ensure your pipeline handles cases where no matching lines 
+#                         exist without breaking if strict execution flags are enabled.
+
+extract_errors() {
+    # TODO: Add your code here
+    echo "TODO: Implement extract_errors"
+}
+
+
+# ==============================================================================
+# TODO 4: Parse Log Timestamps
+# ==============================================================================
+# Task: Create a function called analyze_timeline() that isolates log event timing.
+# - Extract the specific timestamp strings (HH:MM:SS) from the log entries.
+# - Print the time signature of both the first line and the final line.
+#
+# Hint for Beginners: Use basic string extraction tools like 'cut' or 'awk'.
+#                    You can pipe the targets through 'head -n 1' and 'tail -n 1'.
+#                    Command layout tip: awk '{print $2}'
+#
+# Challenge for Advanced: Do not use external head/tail processes. Extract both values 
+#                         directly within a single optimized 'awk' block.
+
+analyze_timeline() {
+    # TODO: Add your code here
+    echo "TODO: Implement analyze_timeline"
+}
+
+
+# ==============================================================================
+# TODO 5: Find High Usage Warnings
+# ==============================================================================
+# Task: Create a function called find_high_usage() that reports resource alerts.
+# - Isolate lines that explicitly report percentage capacity metrics.
+# - Filter and output entries where the metric exceeds an 80% boundary threshold.
+#
+# Hint for Beginners: 
+#   Don't overcomplicate the math logic! Look closely at the data set and use a basic 
+#   'grep' pattern to directly search for the known problem strings (e.g., "85%" and "92%").
+#
+# Challenge for Advanced: 
+#   Write a dynamic parser using a loops or an inner conditional check that strips the 
+#   percentage signs (`%`) out of arbitrary entries, converts them to numerical integers, 
+#   and checks if the value is mathematically greater than 80 (`-gt 80`).
+
+find_high_usage() {
+    # TODO: Add your code here
+    echo "TODO: Implement find_high_usage"
+}
+
+
+# ==============================================================================
+# TODO 6: Generate Summary Report
+# ==============================================================================
+# Task: Create a function called generate_report() that logs metadata to disk.
+# - Generate a structured text summary file named: exercise02_workspace/summary.txt
+# - The file must report total lines processed alongside the log summary counts.
+# - Use the 'tee' utility so the final output prints to screen and files simultaneously.
+
+generate_report() {
+    local report_file="${EXERCISE_DIR}/summary.txt"
+    
+    # TODO: Add your code here
+    echo "TODO: Implement generate_report"
+}
+
+
+# ==============================================================================
+# TODO 7: Clean Sensitive Data
+# ==============================================================================
+# Task: Create a function called sanitize_log() that masks infrastructure details.
+# - Create a carbon copy duplicate of the log named: exercise02_workspace/sanitized.log
+# - Alter the target file contents by replacing specific text percentages with "XX%".
+# - The master structural source file (${LOG_FILE}) must remain untouched.
+#
+# Hint for Beginners: 
+#   Run two separate 'sed' global string substitution lines sequentially.
+#   Example: sed 's/TARGET/REPLACEMENT/g' input > output
+#
+# Challenge for Advanced: 
+#   Execute this in a single clean pass utilizing a standard regular expression token 
+#   capable of matching any 1-3 digit number immediately preceding a percentage symbol.
+#   Cross-Platform Tip: Use 'sed -E' for uniform engine compatibility between Linux and macOS.
+
+sanitize_log() {
+    # TODO: Add your code here
+    echo "TODO: Implement sanitize_log"
+}
+
+
+# ==============================================================================
+# TODO 8: Main Execution Core
+# ==============================================================================
+# Task: Coordinate your individual blocks inside the primary orchestrator engine.
+# Invoke all components sequentially to execute the total task pipeline:
+#
+# Order of Operations:
+# 1. setup_workspace
+# 2. count_log_levels
+# 3. extract_errors
+# 4. analyze_timeline
+# 5. find_high_usage
+# 6. generate_report
+# 7. sanitize_log
+
+main() {
+    echo "=== File System and Log Analysis Exercise ==="
+    echo ""
+    
+    # TODO: Place your function execution triggers here
+    
+    echo ""
+    echo "Exercise complete! Check ${EXERCISE_DIR} for generated files."
+}
+
+# Run program sequence
+main
+
+# ==============================================================================
+# TESTING YOUR SCRIPT
+# ==============================================================================
+# Once code changes are completely written, evaluate execution directly inside terminal:
+#
+# 1. Modify executable system attributes:
+#    chmod +x 02_file_system_practice.sh
+#
+# 2. Run execution layer directly:
+#    ./02_file_system_practice.sh
+#
+# 3. Audit file space outputs:
+#    ls -la exercise02_workspace/
+#    cat exercise02_workspace/errors.log
+#    cat exercise02_workspace/summary.txt
+#
+# 4. Syntactic review validation:
+#    shellcheck 02_file_system_practice.sh
+# ==============================================================================
+
+# ==============================================================================
+# BONUS CHALLENGES - For advanced students moving ahead of schedule:
+# ==============================================================================
+# 1. Extend TODO 4's timeline analysis to display computed runtime elapsed in minutes.
+# 2. Write a function that replicates log-rotation mechanics (keeps only the 3 newest runs).
+# 3. Apply standard 'gzip' data compression tools to package old logs automatically.
+# 4. Modify execution flows to accept external inputs via file arguments ($1) rather than a hardcoded layout.
+# 5. Format the screen output using clean ANSI color escapes (e.g., Red headers for failures, Green for logs).
+# ==============================================================================
