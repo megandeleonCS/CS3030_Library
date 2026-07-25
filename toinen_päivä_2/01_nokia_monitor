@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Lab 02: Sisu System Monitor (Nokia Legacy)
+# Lab 01: Sisu System Monitor (Nokia Legacy)
 # Topics: subprocess.run, Popen, process piping, exit codes, stderr capture
 
 # ==============================================================================
