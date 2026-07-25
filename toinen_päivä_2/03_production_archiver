@@ -13,102 +13,104 @@ import signal
 from pathlib import Path
 
 # Global reference for signal cleanup
-TEMP_DIR = None
+TEMP_DIR = Path("./.staging_temp")
 
 
 # ==============================================================================
 # TODO 1: Environment & Runtime Verification
 # ==============================================================================
-# - Read the environment variable "ARCHIVER_ENV" using os.environ.get(..., "development")
-# - Inspect sys.executable (path to Python interpreter) and sys.prefix (active venv)
-# - Print a warning if running outside a virtual environment (sys.prefix == sys.base_prefix)
-def verify_environment():
-    env_mode = os.environ.get("ARCHIVER_ENV", "development")
-    print(f"[*] Environment Mode: {env_mode}")
-    print(f"[*] Executable Path: {sys.executable}")
-    print(f"[*] Environment Prefix: {sys.prefix}")
+def verify_environment() -> None:
+    """
+    Check active Python runtime environment and environment variables.
     
-    if sys.prefix == getattr(sys, "base_prefix", sys.prefix):
-        print("[!] Warning: Script is running outside of an active virtual environment!")
+    Tasks:
+    1. Fetch 'ARCHIVER_ENV' from os.environ (default to 'development').
+    2. Print execution stats: sys.executable, sys.prefix, and ARCHIVER_ENV.
+    3. Compare sys.prefix against sys.base_prefix. If equal, print a warning to
+       stderr indicating the script is NOT running inside a virtual environment.
+    """
+    # TODO 1: Implement environment verification here
+    raise NotImplementedError("TODO 1 is not implemented.")
 
 
 # ==============================================================================
-# TODO 2: Signal Handling (SIGINT / SIGTERM)
+# TODO 2: Signal Handling (SIGINT / Ctrl+C)
 # ==============================================================================
-# Register a custom handler for signal.SIGINT (Ctrl+C):
-# - Check if global TEMP_DIR exists and delete it using shutil.rmtree() if present.
-# - Output a graceful exit message to stderr and call sys.exit(130).
 def handle_sigint(signum, frame):
-    global TEMP_DIR
-    print("\n[!] Interruption signal received (SIGINT). Cleaning up...", file=sys.stderr)
-    if TEMP_DIR and TEMP_DIR.exists():
-        shutil.rmtree(TEMP_DIR, ignore_errors=True)
-        print(f"[*] Cleaned up staging directory: {TEMP_DIR}", file=sys.stderr)
-    sys.exit(130)
+    """
+    Custom signal handler for SIGINT (Ctrl+C).
+    
+    Tasks:
+    1. Output a warning message to sys.stderr.
+    2. Safely remove global TEMP_DIR if it exists using shutil.rmtree().
+    3. Exit immediately with status code 130.
+    """
+    # TODO 2: Implement SIGINT cleanup logic here
+    raise NotImplementedError("TODO 2 is not implemented.")
 
 
 # ==============================================================================
 # TODO 3: Path Matching and Archiving (pathlib & shutil)
 # ==============================================================================
-# Given a source directory (Path object) and a glob pattern (e.g., "*.log"):
-# - Recursively locate matching files using target_path.rglob(pattern).
-# - Create a temporary staging directory using Path.mkdir().
-# - Copy matching files into the staging area using shutil.copy2().
-# - Archive the staged directory into a ZIP file using shutil.make_archive().
-# - Ensure TEMP_DIR is cleaned up on completion.
-def archive_matching_files(source_dir: Path, pattern: str, output_name: str):
-    global TEMP_DIR
-    TEMP_DIR = Path("./.staging_temp")
+def archive_matching_files(source_dir: Path, pattern: str, output_name: str) -> None:
+    """
+    Recursively find files matching 'pattern', stage them, and package into a ZIP.
     
-    # TODO 3: Implement staging, file searching with pathlib.rglob(), and archiving
+    Tasks:
+    1. Ensure TEMP_DIR exists using Path.mkdir(parents=True, exist_ok=True).
+    2. Recursively find matching files using source_dir.rglob(pattern).
+    3. Copy matched files into TEMP_DIR using shutil.copy2().
+       - Note: Preserve relative paths or rename duplicates to prevent overwriting!
+    4. Create a ZIP archive named 'output_name' from TEMP_DIR using shutil.make_archive().
+    5. Always clean up TEMP_DIR in a 'finally' block to guarantee teardown.
+    """
+    # TODO 3: Implement staging, searching, and archiving logic
     try:
-        TEMP_DIR.mkdir(parents=True, exist_ok=True)
-        
-        # Example recursive search:
-        # matches = list(source_dir.rglob(pattern))
-        
-        # TODO: Copy matches to TEMP_DIR using shutil.copy2
-        # TODO: Package directory using shutil.make_archive(output_name, 'zip', TEMP_DIR)
-        
-        pass
+        raise NotImplementedError("TODO 3 is not implemented.")
     finally:
+        # Guarantee cleanup even if an exception occurs during archiving
         if TEMP_DIR.exists():
             shutil.rmtree(TEMP_DIR, ignore_errors=True)
 
 
 # ==============================================================================
-# TODO 4: CLI Design & Safe Arguments (argparse)
+# TODO 4: CLI Design & Argument Parsing (argparse)
 # ==============================================================================
-# Construct an ArgumentParser object:
-# - Add argument '--source' / '-s': Path to scan (type=Path, required=True).
-# - Add argument '--pattern' / '-p': Glob pattern (default="*.txt").
-# - Add argument '--output'  / '-o': Output zip file name (default="archive").
-# - Validate that the provided source path exists and is a directory.
-def parse_cli_args():
+def parse_cli_args() -> argparse.Namespace:
+    """
+    Construct and parse command-line arguments using argparse.
+    
+    Arguments required:
+    - '-s' / '--source'  : Path to scan (type=Path, required=True, help="Directory to scan")
+    - '-p' / '--pattern' : Glob pattern (type=str, default="*.txt", help="Search pattern")
+    - '-o' / '--output'  : Output zip name (type=str, default="archive", help="Output archive name")
+    
+    Validation:
+    - Check if args.source exists and is a directory. If not, trigger parser.error().
+    """
     parser = argparse.ArgumentParser(
         description="Production utility to safely scan and archive workspace files."
     )
     
-    # TODO 4: Add arguments and perform type/existence validation
-    parser.add_argument("-s", "--source", type=Path, required=True, help="Directory path to scan")
-    parser.add_argument("-p", "--pattern", type=str, default="*.txt", help="Search pattern (e.g. *.log)")
-    parser.add_argument("-o", "--output", type=str, default="archive", help="Name of output zip file")
-
-    args = parser.parse_args()
-
-    if not args.source.exists() or not args.source.is_dir():
-        parser.error(f"Provided source path '{args.source}' is not a valid directory.")
-
-    return args
+    # TODO 4: Define CLI options and perform validation
+    raise NotImplementedError("TODO 4 is not implemented.")
 
 
+# ==============================================================================
+# MAIN EXECUTION FLOW
+# ==============================================================================
 def main():
-    # Attach signal handler
+    # Attach SIGINT handler
     signal.signal(signal.SIGINT, handle_sigint)
     
+    # Verify execution context
     verify_environment()
+    
+    # Parse CLI flags & process archive
     args = parse_cli_args()
     archive_matching_files(args.source, args.pattern, args.output)
+    print(f"[✓] Successfully generated archive: {args.output}.zip")
+
 
 if __name__ == "__main__":
     main()
