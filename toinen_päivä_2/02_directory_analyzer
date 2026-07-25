@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
-# Lab 02: Directory Analyzer (Bash Shell Scripting)
+# Lab 02: Directory Analyzer
 # Script Name: directory_analyzer.sh
-# Topics: Flags, Functions, Input Validation, System Commands (find, du, wc)
+# Topics: Flags (getopts), Functions, Input Validation, Find, Du, and Wc
 # ==============================================================================
 
-# Exit immediately if a command exits with a non-zero status or on unbound variable
+# Exit on error, unset variables, or pipeline failures
 set -euo pipefail
 
 # Global Default Variables
@@ -14,7 +14,7 @@ TARGET_DIR=""
 
 # ------------------------------------------------------------------------------
 # Function: display_usage
-# Description: Prints usage instructions and exits
+# Description: Prints usage instructions
 # ------------------------------------------------------------------------------
 display_usage() {
     echo "Usage: $0 [-h] [-v] <target_directory>"
@@ -25,14 +25,15 @@ display_usage() {
 # ==============================================================================
 # TODO 1: Argument Parsing and Flag Handling
 # ==============================================================================
-# Use getopts or manual flag checking ($1, shift) to parse parameters:
-# - Handle '-h' to call display_usage and exit with code 0.
-# - Handle '-v' to set VERBOSE=true.
-# - Assign the target directory argument to TARGET_DIR.
-# - Exit with status code 1 if no directory parameter is supplied.
+# - Use getopts to parse options:
+#     - '-h' : Call display_usage and exit with code 0.
+#     - '-v' : Set VERBOSE=true.
+#     - Unknown options ('\?') : Call display_usage and exit with code 1.
+# - Shift arguments past parsed options.
+# - Verify that a target directory positional argument was provided ($# -eq 0).
+# - Assign the directory parameter to TARGET_DIR.
 
 parse_arguments() {
-    # TODO 1: Implement argument parsing logic here
     while getopts "hv" opt; do
         case ${opt} in
             h )
@@ -48,73 +49,66 @@ parse_arguments() {
                 ;;
         esac
     done
-    shift $((OPTIND -1))
+    shift $((OPTIND - 1))
 
-    # TODO 1: Check if positional argument for directory exists
-    if [ $# -eq 0 ]; then
-        echo "Error: Missing target directory argument." >&2
-        display_usage
-        exit 1
-    fi
-
-    TARGET_DIR="$1"
+    # TODO 1: Check if the required target directory argument exists.
+    # If missing, print an error to stderr (>&2), call display_usage, and exit 1.
+    
+    # TODO 1: Assign $1 to TARGET_DIR
+    
 }
 
-
 # ==============================================================================
-# TODO 2: Directory Validation & Error Handling
+# TODO 2: Directory Validation
 # ==============================================================================
-# Validate that TARGET_DIR exists and is indeed a directory.
-# - Check if TARGET_DIR exists (-e) and is a directory (-d).
-# - If invalid, print an error message to stderr (>&2) and exit with status code 2.
+# - Ensure TARGET_DIR actually exists and is a directory using test flags (-d).
+# - If invalid, print an error to stderr (>&2) and exit with code 2.
 
 validate_directory() {
-    # TODO 2: Implement directory check here
-    if [ ! -d "$TARGET_DIR" ]; then
-        echo "Error: Directory '$TARGET_DIR' does not exist or is not a directory." >&2
-        exit 2
-    fi
+    # TODO 2: Add directory validation check here
+    : # Replace this colon (null operator) with your logic
 }
-
 
 # ==============================================================================
 # TODO 3: Directory Statistics Analysis
 # ==============================================================================
-# Compute statistics for TARGET_DIR using system tools (find, du, wc):
-# - Count total subdirectories (excluding target root itself).
-# - Count total regular files.
-# - Calculate total disk usage in human-readable format (e.g. du -sh).
-# - Count hidden files (files starting with '.').
+# Compute and print basic metrics for TARGET_DIR:
+# - Total files (type f, excluding root directory items).
+# - Total subdirectories (type d, excluding root directory).
+# - Total human-readable disk size (using `du -sh`).
+# - Count of hidden files (files starting with a dot `.`).
+# - IF $VERBOSE is true: Output a quick list of top file extension counts.
 
 analyze_directory_stats() {
     echo "=================================================="
     echo " DIRECTORY ANALYSIS REPORT"
     echo " Target Directory: ${TARGET_DIR}"
+    echo " Generated On    : $(date '+%Y-%m-%d %H:%M:%S')"
     echo "=================================================="
 
-    # TODO 3: Compute and print the directory statistics
-    # Example commands to use: find "$TARGET_DIR" -type f | wc -l, du -sh "$TARGET_DIR"
-    pass
+    # TODO 3: Implement counts for regular files, subdirs, size, and hidden files.
+    
+    # TODO 3 (Optional / Bonus): Check if $VERBOSE is true and display extra detail.
+    
 }
 
-
 # ==============================================================================
-# TODO 4: File Type and Age Classification
+# TODO 4: File Details and Age Classification
 # ==============================================================================
-# Find and list specific categories of files in TARGET_DIR:
-# - Find the top 3 largest files in the directory.
-# - Count files modified within the last 7 days (using find -mtime).
-# - Print results in a formatted output block.
+# Analyze specific file features:
+# - Find and print the Top 3 largest files (using find, du, sort, and head).
+# - Count how many files were modified within the last 7 days (find -mtime -7).
 
 analyze_file_details() {
     echo "--------------------------------------------------"
     echo " FILE DETAILS & AGES"
     echo "--------------------------------------------------"
 
-    # TODO 4: Implement largest file analysis and age filtering
-    pass
-}
+    # TODO 4: Find top 3 largest files and display them formatted
 
+    # TODO 4: Count files modified in the past 7 days
+    
+}
 
 # ==============================================================================
 # MAIN EXECUTION FLOW
@@ -126,4 +120,5 @@ main() {
     analyze_file_details
 }
 
+# Execute main with all command-line arguments
 main "$@"
