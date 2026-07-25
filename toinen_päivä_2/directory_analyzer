@@ -1,0 +1,129 @@
+#!/bin/bash
+# ==============================================================================
+# Lab 02: Directory Analyzer (Bash Shell Scripting)
+# Script Name: directory_analyzer.sh
+# Topics: Flags, Functions, Input Validation, System Commands (find, du, wc)
+# ==============================================================================
+
+# Exit immediately if a command exits with a non-zero status or on unbound variable
+set -euo pipefail
+
+# Global Default Variables
+VERBOSE=false
+TARGET_DIR=""
+
+# ------------------------------------------------------------------------------
+# Function: display_usage
+# Description: Prints usage instructions and exits
+# ------------------------------------------------------------------------------
+display_usage() {
+    echo "Usage: $0 [-h] [-v] <target_directory>"
+    echo "  -h  Display help menu"
+    echo "  -v  Enable verbose output"
+}
+
+# ==============================================================================
+# TODO 1: Argument Parsing and Flag Handling
+# ==============================================================================
+# Use getopts or manual flag checking ($1, shift) to parse parameters:
+# - Handle '-h' to call display_usage and exit with code 0.
+# - Handle '-v' to set VERBOSE=true.
+# - Assign the target directory argument to TARGET_DIR.
+# - Exit with status code 1 if no directory parameter is supplied.
+
+parse_arguments() {
+    # TODO 1: Implement argument parsing logic here
+    while getopts "hv" opt; do
+        case ${opt} in
+            h )
+                display_usage
+                exit 0
+                ;;
+            v )
+                VERBOSE=true
+                ;;
+            \? )
+                display_usage
+                exit 1
+                ;;
+        esac
+    done
+    shift $((OPTIND -1))
+
+    # TODO 1: Check if positional argument for directory exists
+    if [ $# -eq 0 ]; then
+        echo "Error: Missing target directory argument." >&2
+        display_usage
+        exit 1
+    fi
+
+    TARGET_DIR="$1"
+}
+
+
+# ==============================================================================
+# TODO 2: Directory Validation & Error Handling
+# ==============================================================================
+# Validate that TARGET_DIR exists and is indeed a directory.
+# - Check if TARGET_DIR exists (-e) and is a directory (-d).
+# - If invalid, print an error message to stderr (>&2) and exit with status code 2.
+
+validate_directory() {
+    # TODO 2: Implement directory check here
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "Error: Directory '$TARGET_DIR' does not exist or is not a directory." >&2
+        exit 2
+    fi
+}
+
+
+# ==============================================================================
+# TODO 3: Directory Statistics Analysis
+# ==============================================================================
+# Compute statistics for TARGET_DIR using system tools (find, du, wc):
+# - Count total subdirectories (excluding target root itself).
+# - Count total regular files.
+# - Calculate total disk usage in human-readable format (e.g. du -sh).
+# - Count hidden files (files starting with '.').
+
+analyze_directory_stats() {
+    echo "=================================================="
+    echo " DIRECTORY ANALYSIS REPORT"
+    echo " Target Directory: ${TARGET_DIR}"
+    echo "=================================================="
+
+    # TODO 3: Compute and print the directory statistics
+    # Example commands to use: find "$TARGET_DIR" -type f | wc -l, du -sh "$TARGET_DIR"
+    pass
+}
+
+
+# ==============================================================================
+# TODO 4: File Type and Age Classification
+# ==============================================================================
+# Find and list specific categories of files in TARGET_DIR:
+# - Find the top 3 largest files in the directory.
+# - Count files modified within the last 7 days (using find -mtime).
+# - Print results in a formatted output block.
+
+analyze_file_details() {
+    echo "--------------------------------------------------"
+    echo " FILE DETAILS & AGES"
+    echo "--------------------------------------------------"
+
+    # TODO 4: Implement largest file analysis and age filtering
+    pass
+}
+
+
+# ==============================================================================
+# MAIN EXECUTION FLOW
+# ==============================================================================
+main() {
+    parse_arguments "$@"
+    validate_directory
+    analyze_directory_stats
+    analyze_file_details
+}
+
+main "$@"
