@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+# Lab 02: Sisu System Monitor (Nokia Legacy)
+# Topics: subprocess.run, Popen, process piping, exit codes, stderr capture
+
+# ==============================================================================
+# LAB OVERVIEW
+# ==============================================================================
+# This lab replaces legacy bash monitoring scripts with a Python orchestrator.
+# You will write a Python script that uses `subprocess` to check system 
+# vitals (CPU, disk, memory) and cleanly manage external process pipelines.
+# ==============================================================================
+
+import subprocess
+import sys
+import os
+
+# ==============================================================================
+# TODO 1: Simple Command Execution
+# ==============================================================================
+# Use subprocess.run() to execute the command: 'uname -a'
+# - Capture stdout and stderr separately as text (not bytes)
+# - Print the system name and check if the exit code was 0.
+def get_kernel_info():
+    # TODO: Implement using subprocess.run
+    pass
+
+
+# ==============================================================================
+# TODO 2: Error Handling and Exit Codes
+# ==============================================================================
+# Write a function that attempts to list a non-existent directory (e.g., /invalid/dir)
+# - Trap the CalledProcessError using try-except
+# - Extract and print the exact error string returned on stderr
+def trigger_system_error():
+    # TODO: Implement error trapping
+    pass
+
+
+# ==============================================================================
+# TODO 3: The Subprocess Pipeline (Simulating 'ps aux | grep target')
+# ==============================================================================
+# Recreate a shell pipeline using subprocess.Popen.
+# Pipe 1: 'ps -aux'
+# Pipe 2: 'grep python' (or any target process)
+# Note: You must link pipe1.stdout to pipe2.stdin. Do not use shell=True!
+def find_running_python_processes():
+    # TODO: Implement process-to-process piping using Popen
+    pass
+
+
+# ==============================================================================
+# TODO 4: The Sisu Stress Test (Timeout Management)
+# ==============================================================================
+# Run a command that sleeps for 10 seconds: 'sleep 10'
+# - Set a strict timeout limit of 2 seconds in subprocess.run()
+# - Catch the TimeoutExpired exception, print a warning, and terminate cleanly.
+def run_stress_test():
+    # TODO: Implement timeout logic
+    pass
+
+
+# ==============================================================================
+# TESTING YOUR SCRIPT
+# ==============================================================================
+# 1. Run the script: python3 nokia_monitor.py
+# 2. Ensure all 4 functions run sequentially and handle system errors gracefully.
+# ==============================================================================
