@@ -1,0 +1,342 @@
+Initialize and configure a local Git repository from scratch.
+Manage the Git staging lifecycle (add, commit, restore).
+Inspect project history and file diffs using flexible logging flags.
+Safely modify past commits and temporarily stash working changes.
+Reorganize project directories without losing Git history.
+
+PART 1
+1 Create Project Directory
+# Create and navigate to a new practice directory
+mkdir my-automation-project
+cd my-automation-project
+
+# Verify your current location
+pwd
+
+2 Initialize Git Repo
+# Initialize a brand-new Git repository
+git init
+
+# Check the initial repository status
+git status
+
+#output
+On branch main 
+No commits yet
+nothing to commit (create/copy files and use "git add" to track)
+
+3 Configure User Identity & Defaults  
+# Set your global identity (Replace with your actual details)
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# Set 'main' as the default branch name for new repos
+git config --global init.defaultBranch main
+
+# Verify your user settings
+git config --list | grep user
+
+4 Configure Editor & UI Preferences
+
+# # Set your preferred text editor (uncomment ONE option)
+# git config --global core.editor "nano"
+# git config --global core.editor "vim"
+# git config --global core.editor "code --wait"
+
+# Enable colorized Git output
+git config --global color.ui auto
+
+PART 2
+5 Create Initial Project Files
+# Create a README file
+cat > README.md << 'EOF'
+# My Automation Project
+A collection of automation scripts for system administration.
+
+# Features
+- System monitoring
+- Log analysis
+- Backup automation
+EOF
+
+# Create a cross-platform system monitor script
+cat > monitor.sh << 'EOF'
+#!/bin/bash
+# System monitoring script
+
+echo "=== System Monitor ==="
+echo "Hostname: $(hostname)"
+echo "Uptime: $(uptime)"
+EOF
+
+chmod +x monitor.sh
+
+# Create .gitignore to exclude unnecessary/sensitive files
+cat > .gitignore << 'EOF'
+# Temporary & Log files
+*.tmp
+*.log
+*.swp
+*~
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Build output
+output/
+logs/
+EOF
+
+6 Stage and Commit Files
+# Check untracked files
+git status
+
+# Stage the README file individually
+git add README.md
+git status
+
+# Stage remaining untracked files
+git add monitor.sh .gitignore
+
+# Verify everything is staged (green text)
+git status
+
+# Commit the staged changes
+git commit -m "Initial commit: add README, monitor script, and .gitignore"
+
+# Inspect the commit log
+git log
+
+PART 3
+7 Modify Tracked Files
+# Append new capabilities to monitor.sh
+cat >> monitor.sh << 'EOF'
+echo "Disk Usage: $(df -h . | tail -1)"
+EOF
+
+# Append basic documentation to README.md
+cat >> README.md << 'EOF'
+
+## Quickstart
+Run `./monitor.sh` to check basic system status.
+EOF
+
+8 View Changes (Diffing)
+# See which tracked files were modified
+git status
+
+# Compare working directory changes against the last commit
+git diff
+
+# View changes for a specific file
+git diff README.md
+
+9 Stage and Commit Changes
+# Stage all modified tracked files (-u updates existing files)
+git add -u
+
+# Commit with a multi-line structured commit message
+git commit -m "feat: expand system monitoring capabilities
+
+- Added disk usage checks to monitor script
+- Updated README with quickstart guidance"
+
+# Review the compact history
+git log --oneline
+
+PART 4
+10  Explore History Formats
+# Compact view
+git log --oneline
+
+# Visual graph view (useful once branches are introduced)
+git log --oneline --graph --all
+
+# View line edit statistics per commit
+git log --stat
+
+# Inspect the latest commit details
+git show HEAD
+
+# Inspect the parent commit (1 commit back)
+git show HEAD~1
+
+11 Create Additional Commits
+# Add a skeleton backup script
+cat > backup.sh << 'EOF'
+#!/bin/bash
+# Backup script
+echo "Running automated backup..."
+EOF
+chmod +x backup.sh
+
+git add backup.sh
+git commit -m "feat: add backup script skeleton"
+
+# Add a configuration file
+cat > config.conf << 'EOF'
+MONITOR_INTERVAL=60
+ALERT_EMAIL=admin@example.com
+EOF
+
+git add config.conf
+git commit -m "feat: add application config file"
+
+12 Search History
+# Format log output cleanly
+git log --pretty=format:"%h - %an (%ar): %s"
+
+# Limit history count
+git log -n 3
+
+# Search commit messages for a keyword
+git log --grep="feat"
+
+13 Unstage Files
+# Accidentally modify a file
+echo "DEBUG_MODE=true" >> config.conf
+
+# Stage the modification
+git add config.conf
+git status
+
+# Unstage the changes (move back to Working Directory)
+git restore --staged config.conf
+
+# Verify it is no longer staged
+git status
+
+14 Discard Working Directory Changes
+# Check the unstaged diff
+git diff config.conf
+
+# Discard changes in working directory (DESTRUCTIVE)
+git restore config.conf
+
+# Verify file returned to pristine state
+git status
+
+15 Ammend the Last Commit
+# Append a line to README.md that you forgot to include earlier
+echo "## License" >> README.md
+echo "MIT" >> README.md
+
+git add README.md
+
+# Combine this staged file directly into the previous commit without changing the message
+git commit --amend --no-edit
+
+# Verify history didn't add a new commit, but updated the previous one
+git log -n 2 --oneline
+
+PART 6
+16 File Specific History & Line Blame
+# Trace modifications made to a specific file across commits
+git log -p README.md
+
+# Line-by-line breakdown of who last edited each line
+git blame README.md
+
+17 Test .gitignore Rules
+# Generate temporary files matching .gitignore rules
+touch debug.log temp.tmp
+mkdir -p output
+echo "data" > output/results.txt
+
+# Git status should ignore these automatically
+git status
+
+# Explicitly check ignored files
+git status --ignored
+
+18 Temporarily Stash Work-In-Progress
+# Start making a change
+echo "# WIP script update" >> monitor.sh
+
+# Stash working copy changes away
+git stash -m "WIP: monitor script updates"
+
+# Verify working directory is now clean
+git status
+
+# View the list of stashes
+git stash list
+
+# Re-apply stashed changes and remove from stash list
+git stash pop
+
+# Discard the WIP changes clean up
+git restore monitor.sh
+
+PART 7
+19 Reorganize Directory Structure
+# Create organized subdirectories
+mkdir -p scripts docs
+
+# Safely move tracked files using Git
+git mv monitor.sh scripts/
+git mv backup.sh scripts/
+
+# Commit the structural change
+git commit -m "refactor: reorganize scripts into dedicated directory"
+
+# Track file history across moves (--follow)
+git log --follow --oneline scripts/monitor.sh
+
+20 Clean up & Finalize Documentation
+# Update README to reflect the structure
+cat > README.md << 'EOF'
+# My Automation Project
+
+A professional collection of automation scripts for system administration.
+
+## Project Structure
+```text
+.
+├── config.conf
+├── docs/
+├── README.md
+└── scripts/
+    ├── backup.sh
+    └── monitor.sh
+
+# Make scripts executable and run from root:
+chmod +x scripts/*.sh
+./scripts/monitor.sh
+
+EOF
+git add README.md
+git commit -m "docs: updae project structure and usage in README"
+
+PART 8
+21 Generate Repository Metrics
+```bash
+# Create a repository summary report
+cat > docs/REPOSITORY_INFO.md << EOF
+# Repository Summary
+
+Generated: $(date)
+
+## Statistics
+- Total Commits: $(git rev-list --count HEAD)
+- Tracked Files: $(git ls-files | wc -l)
+- Recent Commit: $(git log -1 --format="%h - %s")
+EOF
+
+git add docs/REPOSITORY_INFO.md
+git commit -m "docs: generate initial repo summary"
+
+# View complete visual commit tree
+git log --oneline --graph --all --decorate
+
+
+# Self-Assessment
+[ ] git status displays nothing to commit, working tree clean.
+[ ] git log --oneline shows a clean series of conventional commit messages.
+[ ] .gitignore actively ignores .tmp and .log files.
+[ ] Tracked shell scripts are located inside the scripts/ directory.
