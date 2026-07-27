@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+"""
+Lab 03: Helsinki Tram Log Aggregator
+Topics: File Streaming (tail -f), Regular Expressions, State Dictionaries, JSON
+"""
+
+import os
+import re
+import time
+import json
+from typing import Generator, Dict, Any, Optional
+
+LOG_FILE_PATH = "/tmp/hsl_tram.log"
+OUTPUT_REPORT_PATH = "hsl_report.json"
+
+# Example log formats to match:
+# "2026-07-14 18:02:11 [TRAM-4T] DELAY: 12 mins at Kamppi (Code: 404)"
+# "2026-07-14 18:02:45 [TRAM-9] OK: On schedule"
+# "2026-07-14 18:03:01 [TRAM-1] ROUTE_CHANGE: Diverted via Kallio"
+
+
+# ==============================================================================
+# TODO 1: Generate Mock Log File
+# ==============================================================================
+def seed_mock_logs(filepath: str = LOG_FILE_PATH) -> None:
+    """
+    Appends a batch of test log entries to the target log file.
+    Ensure the file exists before writing.
+    """
+    # TODO: Open file in append mode ('a') and write 2-3 sample log lines
+    pass
+
+
+# ==============================================================================
+# TODO 2: Tailing Generator
+# ==============================================================================
+def tail_log_file(filepath: str) -> Generator[str, None, None]:
+    """
+    Implements a streaming line generator similar to 'tail -f'.
+    
+    Requirements:
+    1. Check if file exists; if not, create an empty one first.
+    2. Open file and seek to the end (os.SEEK_END) so old logs aren't re-processed.
+    3. Loop infinitely:
+       - Read lines using readline().
+       - If a full line (ending with \\n) is found, yield it.
+       - If no line is found, sleep for 0.1s to avoid high CPU usage.
+    """
+    # TODO: Implement the tailing generator
+    pass
+
+
+# ==============================================================================
+# TODO 3: Regex Extraction Engine
+# ==============================================================================
+# Suggested Named Capture Groups:
+# (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})
+# \[(?P<tram_id>TRAM-[A-Z0-9]+)\]
+# (?P<status>[A-Z_]+):
+# (?P<details>.*)
+
+def parse_log_line(line: str) -> Optional[Dict[str, str]]:
+    """
+    Parses a single log line using regex.
+    
+    Returns:
+        Dict with keys ['timestamp', 'tram_id', 'status', 'details'] if matched.
+        None if the line does not conform to the expected log format.
+    """
+    # TODO: Define pattern, execute search/match, and return dictionary
+    pass
+
+
+# ==============================================================================
+# TODO 4: Aggregation and Periodic JSON Export
+# ==============================================================================
+def aggregate_and_report(report_interval: int = 30) -> None:
+    """
+    Consumes parsed log lines continuously and aggregates metrics:
+    - total_lines_processed: int
+    - event_counts: dict (e.g., {'DELAY': 5, 'ROUTE_CHANGE': 2, 'OK': 12})
+    - delay_minutes_by_tram: dict (e.g., {'TRAM-4T': 12, 'TRAM-3': 5})
+    
+    Saves state to `hsl_report.json` every `report_interval` seconds.
+    """
+    metrics = {
+        "total_lines_processed": 0,
+        "event_counts": {},
+        "delay_minutes_by_tram": {},
+        "last_updated": None
+    }
+    
+    last_flush_time = time.time()
+    
+    # TODO: Iterate over tail_log_file(LOG_FILE_PATH)
+    # TODO: Parse each line using parse_log_line()
+    # TODO: Update metrics dictionary
+    # TODO: Check if time.time() - last_flush_time >= report_interval
+    #       If so, write JSON to OUTPUT_REPORT_PATH atomically and update last_flush_time
+    pass
+
+
+# ==============================================================================
+# MAIN EXECUTION
+# ==============================================================================
+if __name__ == "__main__":
+    print(f"[*] Starting Log Aggregator for {LOG_FILE_PATH}...")
+    print(f"[*] Reporting results every 30s to {OUTPUT_REPORT_PATH}")
+    
+    # Seed mock data once at startup for immediate testing
+    seed_mock_logs()
+    
+    try:
+        aggregate_and_report(report_interval=30)
+    except KeyboardInterrupt:
+        print("\n[*] Stopping Log Aggregator gracefully.")
