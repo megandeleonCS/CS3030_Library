@@ -1,0 +1,17 @@
+# Lab: Mini Containerized Log Inspector
+# Component: Docker Container Blueprint
+
+# TODO 1: Choose a lightweight Python base image (e.g., python:3.11-slim)
+FROM python:3.11-slim
+
+# TODO 2: Set the container working directory to /app
+WORKDIR /app
+
+# TODO 3: Ensure the volume mount folder /data exists inside the image
+RUN mkdir -p /data
+
+# TODO 4: Copy the script into the working directory inside the image
+COPY data_processor.py /app/data_processor.py
+
+# TODO 5: Set default execution command to run data_processor.py
+CMD ["python", "/app/data_processor.py"]
