@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+# Lab: Mini Containerized Log Inspector
+# Component: Data Processor (runs inside Docker container)
+
+import json
+import os
+
+LOG_PATH = "/data/app.log"
+REPORT_PATH = "/data/report.json"
+
+# ==============================================================================
+# TODO 1: Process Mounted Log File & Output Summary JSON
+# ==============================================================================
+def process_logs():
+    """
+    1. Check if LOG_PATH exists.
+    2. Read line-by-line, counting occurrences of '[INFO]', '[WARN]', '[ERROR]'.
+    3. Export counts to REPORT_PATH as a formatted JSON file.
+    """
+    print(f"Reading log file from: {LOG_PATH}")
+
+    # STUB: Default mock counts so student orchestrator can be tested early
+    counts = {
+        "INFO": 0,
+        "WARN": 0,
+        "ERROR": 0
+    }
+
+    if not os.path.exists(LOG_PATH):
+        print(f"Warning: {LOG_PATH} not found. Outputting default stub values.")
+    else:
+        # [STUDENT CODE HERE]
+        # Open LOG_PATH, count level tags in each line, and update 'counts' dictionary.
+        pass
+
+    # Save findings to report JSON
+    print(f"Writing report summary to: {REPORT_PATH}")
+    with open(REPORT_PATH, "w") as f:
+        # [STUDENT CODE HERE]
+        # Use json.dump() to write 'counts' with indent=2
+        json.dump(counts, f, indent=2)
+
+    print("✓ Processing complete.")
+
+
+if __name__ == "__main__":
+    process_logs()
