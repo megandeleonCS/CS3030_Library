@@ -1,116 +1,127 @@
 #!/usr/bin/env python3
-"""
-Lab 03: Helsinki Tram Log Aggregator
-Topics: File Streaming (tail -f), Regular Expressions, State Dictionaries, JSON
-"""
+# Lab 01: Helsinki Tram Log Aggregator
+# Topics: File streaming (tailing), Regular Expressions, State Dictionaries, JSON
 
-import os
+import json
 import re
 import time
-import json
-from typing import Generator, Dict, Any, Optional
 
-LOG_FILE_PATH = "/tmp/hsl_tram.log"
-OUTPUT_REPORT_PATH = "hsl_report.json"
-
-# Example log formats to match:
+# Log format reference:
 # "2026-07-14 18:02:11 [TRAM-4T] DELAY: 12 mins at Kamppi (Code: 404)"
 # "2026-07-14 18:02:45 [TRAM-9] OK: On schedule"
-# "2026-07-14 18:03:01 [TRAM-1] ROUTE_CHANGE: Diverted via Kallio"
-
 
 # ==============================================================================
 # TODO 1: Generate Mock Log File
 # ==============================================================================
-def seed_mock_logs(filepath: str = LOG_FILE_PATH) -> None:
+def seed_mock_logs():
     """
-    Appends a batch of test log entries to the target log file.
-    Ensure the file exists before writing.
+    Utility function to append initial dummy log entries to /tmp/hsl_tram.log.
+    Ensures the file exists and has data before tailing begins.
     """
-    # TODO: Open file in append mode ('a') and write 2-3 sample log lines
-    pass
+    print("Seeding initial mock entries to /tmp/hsl_tram.log...")
+    
+    # STUB: Replace print statement below with actual file write logic
+    # 1. Open /tmp/hsl_tram.log in append mode ('a')
+    # 2. Write 2-3 sample log lines using the exact format above
+    
+    with open("/tmp/hsl_tram.log", "a") as f:
+        # [CODE HERE]
+        pass
 
 
 # ==============================================================================
 # TODO 2: Tailing Generator
 # ==============================================================================
-def tail_log_file(filepath: str) -> Generator[str, None, None]:
+def tail_log_file(filepath):
     """
-    Implements a streaming line generator similar to 'tail -f'.
+    Generator function that mimics Unix 'tail -f'.
+    Continuously yields new lines appended to 'filepath'.
+    """
+    # STUB: The placeholder below yields a static line for initial testing.
+    # Replace this with a real file-streaming generator:
+    # 1. Open filepath in read mode ('r')
+    # 2. Seek to end of file: f.seek(0, 2)
+    # 3. In an infinite loop, read new lines using f.readline()
+    # 4. If line is empty (''), sleep briefly (time.sleep(0.1)) to avoid maxing CPU
+    # 5. Yield complete lines
     
-    Requirements:
-    1. Check if file exists; if not, create an empty one first.
-    2. Open file and seek to the end (os.SEEK_END) so old logs aren't re-processed.
-    3. Loop infinitely:
-       - Read lines using readline().
-       - If a full line (ending with \\n) is found, yield it.
-       - If no line is found, sleep for 0.1s to avoid high CPU usage.
-    """
-    # TODO: Implement the tailing generator
-    pass
+    # [CODE HERE]
+    yield "2026-07-14 18:02:11 [TRAM-4T] DELAY: 12 mins at Kamppi (Code: 404)\n"
 
 
 # ==============================================================================
-# TODO 3: Regex Extraction Engine
+# TODO 3: The Regex Extraction Engine
 # ==============================================================================
-# Suggested Named Capture Groups:
-# (?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})
-# \[(?P<tram_id>TRAM-[A-Z0-9]+)\]
-# (?P<status>[A-Z_]+):
-# (?P<details>.*)
+# TODO: Define a regular expression pattern to parse log entries.
+# Groups to capture:
+#   Group 1: Timestamp (YYYY-MM-DD HH:MM:SS)
+#   Group 2: Tram ID (e.g., TRAM-4T)
+#   Group 3: Status (e.g., DELAY, OK, ROUTE_CHANGE)
+#   Group 4: Details (the remaining string message)
+LOG_PATTERN = re.compile(r"")  # [STUDENT CODE HERE: Add regex string]
 
-def parse_log_line(line: str) -> Optional[Dict[str, str]]:
+def parse_log_line(line):
     """
-    Parses a single log line using regex.
-    
-    Returns:
-        Dict with keys ['timestamp', 'tram_id', 'status', 'details'] if matched.
-        None if the line does not conform to the expected log format.
+    Parses an incoming log string using LOG_PATTERN.
+    Returns a dictionary of extracted fields, or None if the format doesn't match.
     """
-    # TODO: Define pattern, execute search/match, and return dictionary
-    pass
+    # STUB: Returns static mock dict so TODO 4 can be tested immediately.
+    # Replace this with regex match logic:
+    # 1. Match 'line' against LOG_PATTERN
+    # 2. Return None if match fails
+    # 3. If matched, extract groups and return a dictionary:
+    #    {"timestamp": ..., "tram_id": ..., "status": ..., "details": ...}
+
+    # [ CODE HERE]
+    return {
+        "timestamp": "2026-07-14 18:02:11",
+        "tram_id": "TRAM-4T",
+        "status": "DELAY",
+        "details": "12 mins at Kamppi (Code: 404)"
+    }
 
 
 # ==============================================================================
-# TODO 4: Aggregation and Periodic JSON Export
+# TODO 4: Aggregation and JSON Dumping
 # ==============================================================================
-def aggregate_and_report(report_interval: int = 30) -> None:
+def aggregate_and_report():
     """
-    Consumes parsed log lines continuously and aggregates metrics:
-    - total_lines_processed: int
-    - event_counts: dict (e.g., {'DELAY': 5, 'ROUTE_CHANGE': 2, 'OK': 12})
-    - delay_minutes_by_tram: dict (e.g., {'TRAM-4T': 12, 'TRAM-3': 5})
-    
-    Saves state to `hsl_report.json` every `report_interval` seconds.
+    Main loop:
+    1. Tracks running event metrics in a state dictionary.
+    2. Streams new lines via tail_log_file().
+    3. Parses lines via parse_log_line().
+    4. Periodically exports state dictionary to 'hsl_report.json'.
     """
-    metrics = {
-        "total_lines_processed": 0,
-        "event_counts": {},
-        "delay_minutes_by_tram": {},
-        "last_updated": None
+    # Initialize metric state dictionary
+    stats = {
+        "total_events": 0,
+        "delay_counts_by_tram": {}
     }
     
-    last_flush_time = time.time()
-    
-    # TODO: Iterate over tail_log_file(LOG_FILE_PATH)
-    # TODO: Parse each line using parse_log_line()
-    # TODO: Update metrics dictionary
-    # TODO: Check if time.time() - last_flush_time >= report_interval
-    #       If so, write JSON to OUTPUT_REPORT_PATH atomically and update last_flush_time
-    pass
+    print("Starting aggregation loop...")
+
+    # STUB: Basic loop structure provided.
+    # Students need to update counts and write json export logic.
+    # 1. Loop over lines in tail_log_file("/tmp/hsl_tram.log")
+    # 2. Parse each line with parse_log_line()
+    # 3. Update stats["total_events"] and stats["delay_counts_by_tram"]
+    # 4. Export stats to "hsl_report.json" using json.dump(stats, f, indent=2)
+
+    # [ CODE HERE]
+    for line in tail_log_file("/tmp/hsl_tram.log"):
+        parsed = parse_log_line(line)
+        if not parsed:
+            continue
+            
+        print(f"Processed event for: {parsed['tram_id']} - Status: {parsed['status']}")
+        
+        # Write JSON export block here
+        break  # Remove break once infinite generator is implemented
 
 
 # ==============================================================================
 # MAIN EXECUTION
 # ==============================================================================
 if __name__ == "__main__":
-    print(f"[*] Starting Log Aggregator for {LOG_FILE_PATH}...")
-    print(f"[*] Reporting results every 30s to {OUTPUT_REPORT_PATH}")
-    
-    # Seed mock data once at startup for immediate testing
     seed_mock_logs()
-    
-    try:
-        aggregate_and_report(report_interval=30)
-    except KeyboardInterrupt:
-        print("\n[*] Stopping Log Aggregator gracefully.")
+    aggregate_and_report()
