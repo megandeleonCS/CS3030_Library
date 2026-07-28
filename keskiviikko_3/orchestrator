@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Lab: Mini Containerized Log Inspector
+# Component: Bash Orchestrator
+
+# Color codes for terminal reporting
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# ==============================================================================
+# TODO 1: Environment & Prerequisite Checks
+# ==============================================================================
+echo -e "${GREEN}[1/4] Checking Docker Prerequisites...${NC}"
+
+# [STUDENT CODE HERE]
+# Check if 'docker' CLI is available using `command -v docker` or `which docker`.
+# If not installed, echo error in RED and exit 1.
+
+
+# ==============================================================================
+# TODO 2: Seed Host Data Directory & Log File
+# ==============================================================================
+echo -e "${GREEN}[2/4] Seeding Mock Data...${NC}"
+
+# STUB: Create ./data directory and write dummy lines to ./data/app.log
+mkdir -p ./data
+
+cat << 'EOF' > ./data/app.log
+2026-07-28 10:00:00 [INFO] System boot initialised
+2026-07-28 10:01:12 [WARN] High memory usage detected: 82%
+2026-07-28 10:02:05 [ERROR] Database connection lost
+2026-07-28 10:03:40 [ERROR] Failed to retry DB connection
+2026-07-28 10:04:15 [INFO] Backup service complete
+EOF
+
+echo "✓ Seeded ./data/app.log"
+
+
+# ==============================================================================
+# TODO 3: Docker Image Build
+# ==============================================================================
+echo -e "${GREEN}[3/4] Building Docker Image...${NC}"
+
+# [STUDENT CODE HERE]
+# Run `docker build` command tagging image as "mini-log-processor"
+
+
+# ==============================================================================
+# TODO 4: Run Container with Volume Mount & Print Output
+# ==============================================================================
+echo -e "${GREEN}[4/4] Executing Container with Volume Mount...${NC}"
+
+# [STUDENT CODE HERE]
+# Run container using `docker run`:
+# - Use --rm flag to auto-cleanup container after run
+# - Mount local ./data host folder to /data inside container using -v
+# - Target image: mini-log-processor
+
+
+# ==============================================================================
+# Execution Summary
+# ==============================================================================
+echo -e "\n${GREEN}=== Execution Summary ===${NC}"
+if [ -f ./data/report.json ]; then
+    cat ./data/report.json
+    echo -e "\n${GREEN}✓ Lab Completed Successfully!${NC}"
+else
+    echo -e "${RED}✗ Error: ./data/report.json missing!${NC}"
+fi
