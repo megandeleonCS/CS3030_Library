@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""
+Lab 04: "Kimi" — The F1 Provisioning Agent
+Topics: File system automation, environment templating, POSIX permissions, subprocesses
+
+LAB OVERVIEW:
+You are building an automated workspace provisioning script. The script must:
+1. Safely initialize a clean local sandbox directory layout.
+2. Deploy dynamic configuration files using string template interpolation.
+3. Enforce strict Unix security permissions on generated assets.
+4. Check for system dependencies using subprocesses and handle missing tools.
+"""
+
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+SANDBOX_DIR = Path("/tmp/kimi_sandbox")
+
+
+# ==============================================================================
+# TODO 1: Provisioning Sandbox Structure
+# ==============================================================================
+def create_sandbox_layout(base_path: Path = SANDBOX_DIR) -> None:
+    """
+    Ensure a fresh workspace directory exists at `base_path`.
+    
+    Requirements:
+    - If `base_path` already exists, safely recursively remove it (shutil.rmtree).
+    - Construct the following directory tree:
+        <base_path>/
+        ├── config/
+        ├── logs/
+        └── dev_workspace/
+    - Use pathlib.Path or os.makedirs cleanly.
+    """
+    # TODO: Implement clean wipe and directory tree generation
+    pass
+
+
+# ==============================================================================
+# TODO 2: Template Deployer
+# ==============================================================================
+def deploy_config_template(config_dir: Path = SANDBOX_DIR / "config") -> None:
+    """
+    Generate a dynamic service configuration file at `<config_dir>/service.conf`.
+    
+    Requirements:
+    - Create a base template string containing placeholders:
+      `{{USER}}`, `{{PORT}}`, and `{{ENV}}`.
+    - Retrieve system realities:
+      - `{{USER}}`: Current system username (e.g., via os.getlogin() or getpass.getuser()).
+      - `{{PORT}}`: Default to "8080" unless 'KIMI_PORT' exists in os.environ.
+      - `{{ENV}}`: Default to "development".
+    - Replace all placeholders with actual values and write the result to `service.conf`.
+    """
+    # TODO: Read/define template, replace placeholders, and write to file
+    pass
+
+
+# ==============================================================================
+# TODO 3: Unix Permission Lockdown
+# ==============================================================================
+def enforce_permissions(sandbox_path: Path = SANDBOX_DIR) -> None:
+    """
+    Secure the sandbox environment using POSIX file permissions (os.chmod).
+    
+    NOTE: Run this AFTER configuration files are written to avoid write-block errors!
+    
+    Requirements:
+    - Set `<sandbox_path>/config/` directory to Owner Read/Execute ONLY (0o500).
+    - Set `<sandbox_path>/logs/` directory to Owner Read/Write/Execute (0o700).
+    - Verify applied permissions programmatically using `os.stat()` and print 
+      the octal permission string (e.g., '0o500') to stdout for confirmation.
+    """
+    # TODO: Use os.chmod to set octal permissions and verify via os.stat
+    pass
+
+
+# ==============================================================================
+# TODO 4: Dependency Provisioner
+# ==============================================================================
+class ProvisioningError(Exception):
+    """Custom exception raised when system dependency installation fails."""
+    pass
+
+
+def provision_dependencies(tool_name: str = "shellcheck") -> bool:
+    """
+    Verify if a required CLI tool exists on the host system PATH.
+    
+    Requirements:
+    - Check if `tool_name` exists using `shutil.which(tool_name)`.
+    - If found, print a success message and return True.
+    - If missing:
+        - Attempt an installation subprocess command based on available manager 
+          (e.g., `apt-get install -y`, `brew install`, or `apk add`).
+        - If installation fails or package manager is unsupported, raise `ProvisioningError`
+          with a descriptive message.
+    """
+    # TODO: Check executable presence and handle automated fallback installation
+    pass
+
+
+# ==============================================================================
+# MAIN EXECUTION PIPELINE
+# ==============================================================================
+if __name__ == "__main__":
+    print("🏎️ Starting 'Kimi' Provisioning Agent...")
+    try:
+        print("[1/4] Setting up directory layout...")
+        create_sandbox_layout()
+
+        print("[2/4] Deploying configuration templates...")
+        deploy_config_template()
+
+        print("[3/4] Enforcing Unix security permissions...")
+        enforce_permissions()
+
+        print("[4/4] Verifying system dependencies...")
+        provision_dependencies("shellcheck")
+
+        print("Environment successfully provisioned!")
+    except Exception as e:
+        print(f" Provisioning failed: {e}", file=sys.stderr)
+        sys.exit(1)
