@@ -1,0 +1,74 @@
+#Answers
+#LAB 1
+
+#!/bin/bash
+# Exercise 1 Solution - Beginner Baseline
+
+# TODO 1: Set Error Handling
+# (Left blank by beginners)
+
+# TODO 2: Define Variables
+SCRIPT_NAME=$0
+CURRENT_USER=$USER
+CURRENT_DATE=$(date +%Y-%m-%d)
+HOME_DIR=$HOME
+
+# TODO 3: Display Welcome Message
+echo "Welcome to $SCRIPT_NAME"
+echo "Running as user: $CURRENT_USER"
+echo "Current date: $CURRENT_DATE"
+echo "Your home directory is: $HOME_DIR"
+echo ""
+
+# TODO 4: System Information Function
+get_system_info() {
+    echo "=== System Information ==="
+    echo "Hostname: $(hostname)"
+    echo "OS: $(uname -s)"
+    echo "Kernel: $(uname -r)"
+    
+    # Simple approach: Assumes they just write the command for their target lab machine OS
+    echo "CPUs: $(nproc)" 
+    echo ""
+}
+
+# ==============================================================================
+# TODO 5: File Count Function
+# ==============================================================================
+count_files() {
+    echo "=== File Count in $1 ==="
+    # Counts all items in the directory simply
+    echo "Items found: $(ls -1 "$1" | wc -l)"
+    echo ""
+}
+
+# ==============================================================================
+# TODO 6: Disk Usage Function
+# ==============================================================================
+check_disk_usage() {
+    echo "=== Disk Usage ==="
+    # Simplest pass: Just show the raw utility output to the user
+    df -h /
+    echo ""
+}
+
+# ==============================================================================
+# TODO 7: User Input
+# ==============================================================================
+read -p "Enter a directory path (Press Enter for current dir): " USER_DIR
+
+if [ -z "$USER_DIR" ]; then
+    USER_DIR="."
+fi
+
+# ==============================================================================
+# TODO 8: Call Your Functions
+# ==============================================================================
+get_system_info
+count_files "$USER_DIR"
+check_disk_usage
+
+# ==============================================================================
+# TODO 9: Exit Status
+# ==============================================================================
+exit 0
