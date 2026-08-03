@@ -1,2 +1,19 @@
 # CS3030_Library
 Templates for labs
+Maanantai
+01_first_scripts
+Tiistai
+02A_python_beginner
+02B_python_advanced
+02_file_system_practice
+keskiviikko
+03_conditionals_practice
+04_wildcards
+torstai
+05_nokia_monitor
+01_tram_log
+perjantai
+01_sandbox
+02_pitstop
+own_script
+05_optional_git_lab
