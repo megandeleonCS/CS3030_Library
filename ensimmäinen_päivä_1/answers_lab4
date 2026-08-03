@@ -1,0 +1,234 @@
+#!/bin/bash
+# Exercise 4: Advanced Shell Scripting Lab
+# Workspace configuration
+WORKSPACE="lab_workspace"
+
+# ==============================================================================
+# TODO 1: Environment & Test File Setup
+# ==============================================================================
+setup_test_files() {
+    mkdir -p "$WORKSPACE"/{logs,backups,reports,data}
+    
+    # Ultra-efficient nested brace expansion generation
+    touch "$WORKSPACE"/report_2025_{01..12}.txt
+    touch "$WORKSPACE"/backup_file{1..3}.tar.gz
+    touch "$WORKSPACE"/log_{error,warning,info}.txt
+    touch "$WORKSPACE"/data.{csv,json,xml}
+    touch "$WORKSPACE"/image1.jpg "$WORKSPACE"/image2.png "$WORKSPACE"/image3.gif
+    touch "$WORKSPACE"/script.{sh,py,js}
+}
+
+# ==============================================================================
+# TODO 2: Organize Files by Extension
+# ==============================================================================
+organize_by_extension() {
+    local dir="${1:-.}"
+    cd "$dir" || return 1
+    
+    # Safely guard loops from running if no matching files are present
+    shopt -s nullglob
+    
+    for file in *; do
+        if [ -f "$file" ]; then
+            ext="${file##*.}"
+            case "$ext" in
+                txt)         mv "$file" reports/ ;;
+                log)         mv "$file" logs/    ;;
+                tar.gz|gz)   mv "$file" backups/ ;;
+                csv|json|xml) mv "$file" data/   ;;
+            esac
+        fi
+    done
+    shopt -u nullglob
+    cd ..
+}
+
+# ==============================================================================
+# TODO 3: Backup Specific Patterns
+# ==============================================================================
+backup_patterns() {
+    local pattern="$1"
+    local backup_dir="backups_$(date +%Y%m%d)"
+    
+    echo "=== Running Selective Backup System ==="
+    
+    # Prerequisite check: Ensure user actually provided an evaluation target
+    if [ -z "$pattern" ]; then
+        echo "Error: No backup target glob pattern provided."
+        return 1
+    fi
+    
+    # Initialize the target directory space if missing
+    mkdir -p "$backup_dir"
+    
+    # Temporarily activate nullglob so empty matches don't throw errors
+    shopt -s nullglob
+    
+    local match_count=0
+    for file in $pattern; do
+        if [ -f "$file" ]; then
+            # Append a clean date timestamp format prefix or suffix to the backup copy
+            local filename=$(basename "$file")
+            cp "$file" "$backup_dir/$(date +%H%M%S)_$filename"
+            ((match_count++))
+        fi
+    done
+    
+    shopt -u nullglob
+    
+    echo "Backup sequence processing complete. Total items archived: $match_count"
+}
+
+# ==============================================================================
+# TODO 4: Log File Analysis
+# ==============================================================================
+analyze_logs() {
+    echo "=== Log File Analysis ==="
+    
+    shopt -s nullglob
+    # Match the explicit design criteria pattern: log_*.txt
+    local log_files=(log_*.txt)
+    
+    if [ ${#log_files[@]} -eq 0 ]; then
+        echo "No system operational log files found in targeted context space."
+        shopt -u nullglob
+        return 0
+    fi
+    
+    local max_lines=0
+    local largest_file=""
+    
+    for log in "${log_files[@]}"; do
+        # Extract purely the number of lines using standard redirection parsing
+        local lines=$(wc -l < "$log")
+        echo "Log entry target: $log | Line records recorded: $lines"
+        
+        # Max conditional evaluator
+        if [ "$lines" -gt "$max_lines" ]; then
+            max_lines=$lines
+            largest_file=$log
+        fi
+    done
+    
+    shopt -u nullglob
+    
+    echo "----------------------------------------"
+    if [ -n "$largest_file" ]; then
+        echo "Analysis Metric Result: Largest active file is [$largest_file] with $max_lines records."
+    fi
+}
+
+# ==============================================================================
+# TODO 5: Clean Expired Temporary Files
+# ==============================================================================
+clean_old_files() {
+    local days="${1:-30}"
+    
+    echo "=== Cleaning Old Files ==="
+    echo "Scanning execution path context for structural temp files older than $days days..."
+    
+    # Safely aggregate targeted match groups (*.tmp, *.bak)
+    shopt -s nullglob
+    local target_files=()
+    
+    # Leverage local find commands with exact date tracking constraints
+    # -type f forces files only; -mtime +N captures files strictly older than N days
+    while IFS= read -r line; do
+        [ -n "$line" ] && target_files+=("$line")
+    done < <(find . -maxdepth 1 -type f \( -name "*.tmp" -o -name "*.bak" \) -mtime +"$days" 2>/dev/null)
+    
+    if [ ${#target_files[@]} -eq 0 ]; then
+        echo "No matching expired temporary clean up tasks detected."
+        shopt -u nullglob
+        return 0
+    fi
+    
+    echo "The following expired objects have been selected for immediate removal:"
+    printf ' - %s\n' "${target_files[@]}"
+    echo ""
+    
+    # Safety feature: Explicit user configuration validation trap
+    read -p "Are you absolutely sure you want to permanently purge these files? (y/N): " confirm
+    
+    case "$confirm" in
+        [yY]|[yY][eE][sS])
+            echo "Confirmation accepted. Commencing structural purge..."
+            for file in "${target_files[@]}"; do
+                if rm "$file"; then
+                    echo "[DELETED LOG] Purged: $file at $(date '+%Y-%m-%d %H:%M:%S')"
+                fi
+            done
+            ;;
+        *)
+            echo "Destructive execution cancelled. File environments remain untouched."
+            shopt -u nullglob
+            return 1
+            ;;
+    esac
+    
+    shopt -u nullglob
+}
+
+# ==============================================================================
+# TODO 6: Bulk File Extension Renamer
+# ==============================================================================
+bulk_rename() {
+    local old_ext="$1"
+    local new_ext="$2"
+    
+    if [ -z "$old_ext" ] || [ -z "$new_ext" ]; then
+        echo "Error: Both target extension and replacement extension are required."
+        return 1
+    fi
+    
+    shopt -s nullglob
+    for file in *."$old_ext"; do
+        # Extract filename base prefix minus extension
+        local base="${file%.$old_ext}"
+        echo "Renaming: $file -> ${base}.$new_ext"
+        mv "$file" "${base}.$new_ext"
+    done
+    shopt -u nullglob
+}
+
+# ==============================================================================
+# TODO 7: Generate System Summary Report
+# ==============================================================================
+generate_summary() {
+    local dir="${1:-.}"
+    echo "=== System Workspace Directory Summary ==="
+    echo "Target Directory: $dir"
+    echo "----------------------------------------"
+    
+    if [ ! -d "$dir" ]; then
+        echo "Error: Target path does not exist or is not a directory."
+        return 1
+    fi
+    
+    local file_count
+    local dir_count
+    
+    file_count=$(find "$dir" -maxdepth 1 -type f | wc -l)
+    dir_count=$(find "$dir" -maxdepth 1 -type d | grep -v "^$dir$" | wc -l)
+    
+    echo "Total Files: $file_count"
+    echo "Total Directories: $dir_count"
+}
+
+# ==============================================================================
+# TODO 8: Orchestrator Core Main Function
+# ==============================================================================
+main() {
+    echo "=== Initializing Advanced Lab Execution ==="
+    echo ""
+    
+    setup_test_files
+    organize_by_extension "$WORKSPACE"
+    generate_summary "$WORKSPACE"
+    
+    echo ""
+    echo "Execution sequence finished successfully!"
+}
+
+# Launch lab program sequence
+main
