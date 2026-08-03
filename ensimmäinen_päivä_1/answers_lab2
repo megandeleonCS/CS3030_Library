@@ -1,0 +1,103 @@
+##Beginner Answers to Lab 2
+
+setup_workspace() {
+    mkdir -p "${EXERCISE_DIR}"
+    create_sample_log
+}
+
+count_log_levels() {
+    echo "=== Log Level Counts ==="
+    echo "INFO: $(grep -c "INFO" "${LOG_FILE}")"
+    echo "WARNING: $(grep -c "WARNING" "${LOG_FILE}")"
+    echo "ERROR: $(grep -c "ERROR" "${LOG_FILE}")"
+    echo "CRITICAL: $(grep -c "CRITICAL" "${LOG_FILE}")"
+}
+
+extract_errors() {
+    echo "=== Errors Extracted ==="
+    grep -E "ERROR|CRITICAL" "${LOG_FILE}" > "${EXERCISE_DIR}/errors.log"
+    echo "Found $(wc -l < "${EXERCISE_DIR}/errors.log") error entries"
+}
+
+analyze_timeline() {
+    echo "=== Timeline Analysis ==="
+    echo "First entry: $(head -n 1 "${LOG_FILE}" | cut -d' ' -f2)"
+    echo "Last entry: $(tail -n 1 "${LOG_FILE}" | cut -d' ' -f2)"
+}
+
+find_high_usage() {
+    echo "=== High Usage Warnings ==="
+    grep -E "85%|92%" "${LOG_FILE}"
+}
+
+generate_report() {
+    local report_file="${EXERCISE_DIR}/summary.txt"
+    echo "=== Summary Report ===" | tee "${report_file}"
+    count_log_levels | tee -a "${report_file}"
+}
+
+sanitize_log() {
+    # Basic sequential target masking
+    sed 's/85%/XX%/g' "${LOG_FILE}" | sed 's/92%/XX%/g' > "${EXERCISE_DIR}/sanitized.log"
+}
+
+
+##Advanced Answers Lab 2
+setup_workspace() {
+    if [ ! -d "${EXERCISE_DIR}" ]; then
+        mkdir -p "${EXERCISE_DIR}"
+    fi
+    create_sample_log
+}
+
+count_log_levels() {
+    echo "=== Log Level Counts ==="
+    for level in INFO WARNING ERROR CRITICAL; do
+        printf "%s: %d\n" "$level" "$(grep -c "$level" "${LOG_FILE}")"
+    done
+}
+
+extract_errors() {
+    local err_file="${EXERCISE_DIR}/errors.log"
+    # Ensure error handling doesn't crash script if grep returns 0 matches
+    grep -E "ERROR|CRITICAL" "${LOG_FILE}" > "$err_file" || true
+    local count
+    count=$(wc -l < "$err_file")
+    echo "=== Errors Extracted ==="
+    echo "Found $count error entries"
+    echo "Saved to errors.log"
+}
+
+analyze_timeline() {
+    echo "=== Timeline Analysis ==="
+    local first last
+    first=$(awk 'NR==1 {print $2}' "${LOG_FILE}")
+    last=$(awk 'END {print $2}' "${LOG_FILE}")
+    echo "First entry: $first"
+    echo "Last entry: $last"
+}
+
+find_high_usage() {
+    echo "=== High Usage Warnings ==="
+    # Dynamically locate lines with numbers followed by % signs
+    grep -E "[0-9]+%" "${LOG_FILE}" | while read -r line; do
+        local pct
+        pct=$(echo "$line" | grep -oE "[0-9]+" | head -n 1)
+        if [ "$pct" -gt 80 ]; then
+            echo "- $line"
+        fi
+    done
+}
+
+generate_report() {
+    local report_file="${EXERCISE_DIR}/summary.txt"
+    {
+        echo "Total Entries: $(wc -l < "${LOG_FILE}")"
+        count_log_levels
+    } | tee "${report_file}"
+}
+
+sanitize_log() {
+    # Portable extended regex for both Linux (GNU) and macOS (BSD) sed engines
+    sed -E 's/[0-9]+%/XX%/g' "${LOG_FILE}" > "${EXERCISE_DIR}/sanitized.log"
+}
