@@ -1,3 +1,4 @@
+This Lab is optional.
 Initialize and configure a local Git repository from scratch.
 Manage the Git staging lifecycle (add, commit, restore).
 Inspect project history and file diffs using flexible logging flags.
