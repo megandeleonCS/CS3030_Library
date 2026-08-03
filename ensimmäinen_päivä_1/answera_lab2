@@ -1,0 +1,42 @@
+#Beginner Answers to Lab 2
+
+setup_workspace() {
+    mkdir -p "${EXERCISE_DIR}"
+    create_sample_log
+}
+
+count_log_levels() {
+    echo "=== Log Level Counts ==="
+    echo "INFO: $(grep -c "INFO" "${LOG_FILE}")"
+    echo "WARNING: $(grep -c "WARNING" "${LOG_FILE}")"
+    echo "ERROR: $(grep -c "ERROR" "${LOG_FILE}")"
+    echo "CRITICAL: $(grep -c "CRITICAL" "${LOG_FILE}")"
+}
+
+extract_errors() {
+    echo "=== Errors Extracted ==="
+    grep -E "ERROR|CRITICAL" "${LOG_FILE}" > "${EXERCISE_DIR}/errors.log"
+    echo "Found $(wc -l < "${EXERCISE_DIR}/errors.log") error entries"
+}
+
+analyze_timeline() {
+    echo "=== Timeline Analysis ==="
+    echo "First entry: $(head -n 1 "${LOG_FILE}" | cut -d' ' -f2)"
+    echo "Last entry: $(tail -n 1 "${LOG_FILE}" | cut -d' ' -f2)"
+}
+
+find_high_usage() {
+    echo "=== High Usage Warnings ==="
+    grep -E "85%|92%" "${LOG_FILE}"
+}
+
+generate_report() {
+    local report_file="${EXERCISE_DIR}/summary.txt"
+    echo "=== Summary Report ===" | tee "${report_file}"
+    count_log_levels | tee -a "${report_file}"
+}
+
+sanitize_log() {
+    # Basic sequential target masking
+    sed 's/85%/XX%/g' "${LOG_FILE}" | sed 's/92%/XX%/g' > "${EXERCISE_DIR}/sanitized.log"
+}
