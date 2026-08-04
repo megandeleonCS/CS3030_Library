@@ -1,0 +1,116 @@
+#!/usr/bin/env python3
+# Lab 06: Helsinki Tram Log Aggregator (Solution)
+# Topics: File streaming (generators), Regular Expressions, State Dictionaries, JSON
+
+import json
+import os
+import re
+import time
+
+LOG_FILE = "/tmp/hsl_tram.log"
+REPORT_FILE = "hsl_report.json"
+
+# ==============================================================================
+# HELPER: Auto-Seed Log File
+# ==============================================================================
+def setup_mock_log():
+    """Initializes dummy log data so streaming functions can be tested immediately."""
+    initial_entries = [
+        "2026-07-14 18:02:11 [TRAM-4T] DELAY: 12 mins at Kamppi (Code: 404)\n",
+        "2026-07-14 18:02:45 [TRAM-9] OK: On schedule\n",
+        "2026-07-14 18:03:01 [TRAM-4T] DELAY: 15 mins at Kamppi (Code: 404)\n"
+    ]
+    with open(LOG_FILE, "w") as f:
+        f.writelines(initial_entries)
+    print(f"[Setup] Initialized {LOG_FILE} with initial data.")
+
+# ==============================================================================
+# 1: Tailing Generator
+# ==============================================================================
+def tail_log_file(filepath):
+    """
+    Generator function mimicking Unix 'tail -f'.
+    Continuously yields new lines appended to 'filepath'.
+    """
+    with open(filepath, "r") as f:
+        # Move to the end of the file for live streaming
+        f.seek(0, 2)
+        
+        while True:
+            line = f.readline()
+            if not line:
+                time.sleep(0.2)  # Prevent high CPU usage when idle
+                continue
+            yield line
+
+# ==============================================================================
+# 2: Regex Parsing Engine
+# ==============================================================================
+LOG_PATTERN = re.compile(
+    r"^(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) \[(?P<tram_id>[\w-]+)\] (?P<status>\w+): (?P<details>.*)$"
+)
+
+def parse_log_line(line):
+    """
+    Parses an incoming log string using LOG_PATTERN.
+    Returns a dictionary of matched fields, or None if invalid.
+    """
+    match = LOG_PATTERN.match(line.strip())
+    if not match:
+        return None
+    return match.groupdict()
+
+# ==============================================================================
+# 3: Stream Aggregator & JSON Reporting
+# ==============================================================================
+def aggregate_and_report():
+    """
+    Main execution loop.
+    Reads stream, parses content, updates memory, and writes state to JSON.
+    """
+    stats = {
+        "total_events": 0,
+        "delay_counts_by_tram": {}
+    }
+    
+    print(f"Starting log aggregator on {LOG_FILE}... (Press Ctrl+C to stop)")
+    
+    batch_counter = 0
+    SAVE_THRESHOLD = 5  # Export JSON every 5 processed records to save disk I/O
+
+    try:
+        for line in tail_log_file(LOG_FILE):
+            parsed = parse_log_line(line)
+            if not parsed:
+                continue
+
+            # Update core metrics
+            stats["total_events"] += 1
+            tram_id = parsed["tram_id"]
+
+            if parsed["status"] == "DELAY":
+                stats["delay_counts_by_tram"][tram_id] = stats["delay_counts_by_tram"].get(tram_id, 0) + 1
+
+            print(f"[{parsed['timestamp']}] Log Processed: {tram_id} - {parsed['status']}")
+
+            # Periodically export stats dictionary to JSON file
+            batch_counter += 1
+            if batch_counter >= SAVE_THRESHOLD:
+                with open(REPORT_FILE, "w") as json_out:
+                    json.dump(stats, json_out, indent=2)
+                print(f"--> Dumped updated metrics to {REPORT_FILE}")
+                batch_counter = 0
+
+    except KeyboardInterrupt:
+        print("\nStopping log aggregator. Finalizing export...")
+        # Ensure we do one last save on exit if there are unprocessed events
+        with open(REPORT_FILE, "w") as json_out:
+            json.dump(stats, json_out, indent=2)
+        print(f"Final report saved to {REPORT_FILE}.")
+
+# ==============================================================================
+# MAIN EXECUTION
+# ==============================================================================
+if __name__ == "__main__":
+    setup_mock_log()
+    aggregate_and_report()
