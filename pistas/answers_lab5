@@ -1,92 +1,98 @@
 #!/bin/bash
-# Lab 03: Wildcards and Pattern Matching Practice
+# Lab 03: Wildcards and Pattern Matching Practice (Solution)
 # Topics: Globbing (*, ?, []), Brace Expansion ({}), Parameter Expansion
-# Duration: 30 minutes
 
 WORKSPACE="lab3_workspace"
 
 # ==============================================================================
-# TODO 1: Environment Setup
+# 1: Environment Setup
 # ==============================================================================
-# Task: Create workspace folders and test files using brace expansion.
-# Requirements:
-# 1. Create subdirectories: logs/, backups/, reports/, data/ inside $WORKSPACE.
-# 2. Populate test files:
-#    - reports: report_2025_01.txt through report_2025_06.txt
-#    - data: data.csv, data.json, data.xml
-#    - logs: log_error.txt, log_warning.txt, log_info.txt (Write dummy text into these!)
-
 setup_test_files() {
     echo "Setting up test environment workspace..."
+    
+    # Create target directories using brace expansion
     mkdir -p "$WORKSPACE"/{logs,backups,reports,data}
     
-    # Example brace expansion creation:
+    # Populate test files using brace expansion
     touch "$WORKSPACE"/reports/report_2025_{01..06}.txt
     touch "$WORKSPACE"/data/data.{csv,json,xml}
     
-    # TODO: Add dummy content to log files so TODO 4 can count lines
-    echo -e "Error 1\nError 2\nError 3" > "$WORKSPACE/logs/log_error.txt"
-    echo -e "Warning 1" > "$WORKSPACE/logs/log_warning.txt"
-    echo -e "Info line" > "$WORKSPACE/logs/log_info.txt"
+    # Populate log files with actual line entries for analysis
+    echo -e "Error: Connection timeout\nError: Disk full\nError: Access denied" > "$WORKSPACE/logs/log_error.txt"
+    echo -e "Warning: High CPU usage" > "$WORKSPACE/logs/log_warning.txt"
+    echo -e "Info: Service started\nInfo: User logged in" > "$WORKSPACE/logs/log_info.txt"
     
     echo "Workspace population complete."
 }
 
 # ==============================================================================
-# TODO 2: Pattern Matching & Filtering
+# 2: Pattern Matching & Filtering
 # ==============================================================================
-# Task: Demonstrate wildcard matching using ls on files in $WORKSPACE/reports.
-# Patterns to test:
-# - Match all .txt files (*.txt)
-# - Match specific month range using character classes (e.g., report_2025_0[1-3].txt)
-# - Use single character wildcard (?) for month digits
-
 practice_wildcards() {
     echo "=== Wildcard Pattern Matching ==="
     
-    # TODO: Output matching files from $WORKSPACE/reports using wildcard patterns
-    # Example: ls "$WORKSPACE"/reports/report_2025_0?.txt 2>/dev/null || true
+    echo "1. All .txt files in reports:"
+    ls "$WORKSPACE"/reports/*.txt 2>/dev/null || true
+    echo ""
+
+    echo "2. Reports for months 01 through 03 using character range [...]:"
+    ls "$WORKSPACE"/reports/report_2025_0[1-3].txt 2>/dev/null || true
+    echo ""
+
+    echo "3. Single character wildcard (?) for month digits:"
+    ls "$WORKSPACE"/reports/report_2025_??.txt 2>/dev/null || true
 }
 
 # ==============================================================================
-# TODO 3: Brace Expansion Showcase
+# 3: Brace Expansion Showcase
 # ==============================================================================
-# Task: Print expanded string sequences directly to stdout using `echo`.
-# Required outputs:
-# - Numeric sequence: 1 through 10
-# - Step sequence: 0 through 50 by 10s
-# - Combined matrix: {A,B}{1,2}
-
 practice_brace_expansion() {
     echo "=== Brace Expansion Examples ==="
     
-    # TODO: Add your echo statements demonstrating brace expansion
+    echo "Numeric range 1 through 10:"
+    echo {1..10}
+    echo ""
+
+    echo "Step sequence 0 through 50 by 10s:"
+    echo {0..50..10}
+    echo ""
+
+    echo "Combined matrix sequence {A,B}{1,2}:"
+    echo {A,B}{1,2}
 }
 
 # ==============================================================================
-# TODO 4: Log File Line Counter
+# 4: Log File Line Counter
 # ==============================================================================
-# Task: Identify all log files matching 'log_*.txt' in $WORKSPACE/logs and count their lines.
-# Requirements:
-# - Use a wildcard glob in combination with `wc -l` to output line metrics.
-
 analyze_logs() {
     echo "=== Log File Analysis ==="
     
-    # TODO: Implement line count analysis on $WORKSPACE/logs/log_*.txt
+    # Check if target files exist using glob expansion
+    if ls "$WORKSPACE"/logs/log_*.txt >/dev/null 2>&1; then
+        echo "Line counts for log files matching 'log_*.txt':"
+        wc -l "$WORKSPACE"/logs/log_*.txt
+    else
+        echo "No log files matching pattern 'log_*.txt' were found."
+    fi
 }
 
 # ==============================================================================
-# TODO 5: Bulk File Extension Changer
+# 5: Bulk File Extension Changer
 # ==============================================================================
-# Task: Rename all .txt files in $WORKSPACE/reports to .bak extension using parameter expansion.
-# Hint: Loop over target files `for f in "$WORKSPACE"/reports/*.txt; do`
-# Use string trimming `${f%.txt}.bak` to form the target path.
-
 bulk_rename() {
-    echo "=== Bulk Extension Rename ==="
+    echo "=== Bulk Extension Rename (.txt -> .bak) ==="
     
-    # TODO: Implement the for-loop rename logic
+    # Loop over all matching files in the reports folder
+    for file in "$WORKSPACE"/reports/*.txt; do
+        # Guard against unexpanded globs when no matching files exist
+        [ -e "$file" ] || continue
+        
+        # Strip suffix .txt and append .bak using parameter expansion
+        new_file="${file%.txt}.bak"
+        
+        mv "$file" "$new_file"
+        echo "Renamed: $(basename "$file") -> $(basename "$new_file")"
+    done
 }
 
 # ==============================================================================
@@ -111,5 +117,5 @@ main() {
     echo "Exercise sequence complete!"
 }
 
-# Uncomment to execute:
-# main
+# Execute script orchestration
+main
