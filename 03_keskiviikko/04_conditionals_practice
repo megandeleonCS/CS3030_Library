@@ -1,252 +1,172 @@
 #!/bin/bash
-# Exercise 3: Conditionals and Logic Practice
-# Topics: if/elif/else, test operators, case statements
-# Duration: 45 minutes
-
-# ==============================================================================
-# EXERCISE OVERVIEW
-# ==============================================================================
-# This exercise reinforces conditional logic and decision-making:
-# - if/elif/else statements
-# - File test operators (-f, -d, -L, -r, -w, -x)
-# - String vs. numeric comparisons
-# - Logical operators (&&, ||)
-# - case statements and interactive loop controllers
-# ==============================================================================
+# Lab 01: Conditionals and Logic Practice
+# Topics: if/elif/else, test operators, case statements, functions
+# Duration: 30-40 minutes
 
 # Advanced Configuration: 
-#   If you want to run this script in production-grade strict mode, uncomment below:
-# # set -euo pipefail
+# Uncomment the line below to run this script in production-grade strict mode:
+# set -euo pipefail
 
 # ==============================================================================
 # TODO 1: File Checker Function
 # ==============================================================================
 # Task: Verify an object's existence, structural type, and permissions.
-# Hint for Beginners: 
-#   Use file flags sequentially: -e (exists), -f (file), -d (directory), 
-#   -r (readable), -w (writable), -x (executable).
-# Challenge for Advanced: 
-#   Account for symbolic links specifically using the '-L' check, and make sure 
-#   to handle broken symlinks gracefully without breaking script execution flow.
+# Rules: Check sequentially: -e (exists), -L (symlink), -f (file), -d (directory),
+#        -r (readable), -w (writable), -x (executable).
 
 check_file() {
     local filepath="$1"
     
-    # TODO: Add your conditional checks here
-    echo "TODO: Implement check_file"
+    if [ ! -e "$filepath" ] && [ ! -L "$filepath" ]; then
+        echo "Error: Path '$filepath' does not exist."
+        return 1
+    fi
+
+    # TODO: Output details about file type and permissions
+    echo "TODO: Implement check_file logic for $filepath"
 }
 
 # ==============================================================================
-# TODO 2: Number Validator Function
+# TODO 2: Integer & Network Port Validator
 # ==============================================================================
-# Task: Verify if an input string is a valid integer, and profile its properties.
-# Hint for Beginners: 
-#   To check if a string is purely an integer without crashing your script:
-#   if [[ "$input" =~ ^-?[0-9]+$ ]]; then ...
-#   To check parity (even/odd), use the remainder arithmetic tool: $((input % 2))
-# Challenge for Advanced: 
-#   Handle inputs that contain floating-point decimals, or reject them cleanly 
-#   with an explicit exit code status of 1.
+# Task: Verify if an input string is a valid integer AND check if it's a valid port.
+# Rules: 
+# 1. Reject non-integers (regex: ^-?[0-9]+$).
+# 2. If positive, classify port ranges: Well-known (1-1023), Registered (1024-49151), Dynamic (49152-65535).
 
-validate_number() {
+validate_number_and_port() {
     local input="$1"
     
-    # TODO: Add your code here
-    echo "TODO: Implement validate_number"
+    # TODO: Validate regex match for integer
+    # TODO: Evaluate numerical port ranges using -ge and -le
+    echo "TODO: Implement validate_number_and_port for $input"
 }
 
 # ==============================================================================
-# TODO 3: Port Checker Function
+# TODO 3: Backup Decision Function
 # ==============================================================================
-# Task: Evaluate if a port number fits within the standard network standards.
-# Range Rules: Well-known (1-1023), Registered (1024-49151), Dynamic (49152-65535)
-# Hint for Beginners: Use standard numeric test operators: -ge (>=) and -le (<=).
-#                     Example: if [ "$port" -ge 1 ] && [ "$port" -le 1023 ]; then
-
-check_port() {
-    local port="$1"
-    
-    # TODO: Add your code here
-    echo "TODO: Implement check_port"
-}
-
-# ==============================================================================
-# TODO 4: Service Status Simulator
-# ==============================================================================
-# Task: Read a service name string and output its state using a 'case' match table.
-# Target Strings to handle: "nginx", "mysql", "docker"
-# Hint for Beginners: The structural skeleton is provided below. Add your matching 
-#                    labels inside the open slots. Use clear messages for each.
-
-check_service_status() {
-    local service="$1"
-    
-    # Simulate status check (random choice engine for simulation)
-    local statuses=("running" "stopped" "error")
-    local status="${statuses[$((RANDOM % 3))]}"
-    
-    # TODO: Complete the case branches to evaluate $service
-    case "$service" in
-        "nginx")
-            echo "Nginx Proxy Service status is: $status"
-            ;;
-        # Add mysql and docker blocks here
-        *)
-            echo "Unknown system service entry target: $service"
-            return 1
-            ;;
-    esac
-}
-
-# ==============================================================================
-# TODO 5: Backup Decision Function
-# ==============================================================================
-# Task: Combine parameters to decide if a file needs historical archival preservation.
-# Conditions: Must exist (-e), must be readable (-r), size must be greater than 0 (-s), 
-#             and must have been modified within the last day.
-# Hint for Beginners: 
-#   To easily test if a file was modified in the last 24 hours without deep scripts:
-#   if find "$filepath" -mtime -1 | grep -q .; then ...
-# Challenge for Advanced: 
-#   Do not rely on invoking external 'find' or 'stat' binaries. Calculate temporal 
-#   age parameters natively inside the shell execution space or check it elegantly.
+# Task: Determine if a file requires backup archival.
+# Conditions: Must exist (-e), be readable (-r), non-empty (-s), 
+#              and modified within the last 24 hours.
+# Hint: Use `find "$filepath" -mtime -1` to check recent modifications.
 
 should_backup() {
     local filepath="$1"
     
-    # TODO: Add your compound logic here
-    echo "TODO: Implement should_backup"
+    # TODO: Add compound checks (&&) to verify eligibility
+    echo "TODO: Implement should_backup for $filepath"
 }
 
 # ==============================================================================
-# TODO 6: Environment Validator
+# TODO 4: Environment Auditor
 # ==============================================================================
-# Task: Audit host conditions to ensure standard configuration parameters match requirements.
-# Requirements: Commands (git, bash, awk), Env variables ($HOME, $USER), Bash version >= 4.0
-# Hint for Beginners: 
-#   - Check commands using: command -v name >/dev/null
-#   - Check the primary Bash major version token directly using: if [ "${BASH_VERSINFO[0]}" -ge 4 ]
+# Task: Ensure system dependencies and environment variables are present.
+# Requirements: Commands (git, bash), Env variables ($HOME, $USER), Bash version >= 4.
 
 validate_environment() {
-    local all_valid=0
-    echo "=== Running Environment Validation Audit ==="
+    echo "=== Running Environment Audit ==="
     
-    # TODO: Complete verification loops here
-    
-    return $all_valid
+    # TODO: Check required binaries using `command -v <cmd>`
+    # TODO: Verify major Bash version using ${BASH_VERSINFO[0]}
+    echo "TODO: Implement environment checks"
 }
 
 # ==============================================================================
-# TODO 7: User Permission Checker
+# TODO 5: User Permission Checker
 # ==============================================================================
-# Task: Assess the active user privileges on this shell host.
-# Hint for Beginners: 
-#   - To check if a user is root, look directly at the internal ID value: if [ "$EUID" -eq 0 ]
-#   - To check if they are in the sudo configuration space: groups | grep -q "sudo"
-# Challenge for Advanced: 
-#   Don't scan active shell state variables. Programmatically look up the exact username 
-#   passed in the parameters against the system account logs inside '/etc/passwd'.
+# Task: Assess active user privileges on the host.
+# Rules: Check if the current user is root ($EUID -eq 0) or has sudo group access.
 
 check_permissions() {
     local username="${1:-$USER}"
     
-    # TODO: Add your code here
-    echo "TODO: Implement check_permissions"
+    # TODO: Evaluate $EUID and membership in the 'sudo' or 'wheel' groups
+    echo "TODO: Implement check_permissions for $username"
 }
 
 # ==============================================================================
-# TODO 8: Deployment Environment Selector
+# TODO 6: Deployment Profile Selector
 # ==============================================================================
-# Task: Match a deployment target string and instantiate matching environment flags.
+# Task: Set deployment parameters based on target environment string using `case`.
 # Environments: dev, staging, prod
-# Configurations to set: DB_HOST, API_URL, LOG_LEVEL, DEBUG_MODE
 
 select_deployment_env() {
     local env="$1"
     
-    # TODO: Complete the target routing architecture below using assignment statements
     case "$env" in
         "dev")
             DB_HOST="localhost"
             API_URL="http://127.0.0.1:8080"
             LOG_LEVEL="debug"
-            DEBUG_MODE="true"
             ;;
-        # Complete staging and prod profiles here
+        "staging")
+            # TODO: Configure staging variables
+            ;;
+        "prod")
+            # TODO: Configure prod variables
+            ;;
         *)
-            echo "Invalid target destination workspace environment framework: $env"
-            echo "Permitted inputs: dev, staging, prod"
+            echo "Invalid environment '$env'. Use: dev, staging, prod"
             return 1
             ;;
     esac
     
-    # Display the final summary configuration block
-    echo "Environment initialized: $env"
-    echo "Settings -> Host: $DB_HOST | API: $API_URL | Level: $LOG_LEVEL | Debug: $DEBUG_MODE"
+    echo "Environment loaded: $env (Host: $DB_HOST | Level: $LOG_LEVEL)"
 }
 
 # ==============================================================================
-# TODO 9: Main Interactive Dashboard Menu
+# MAIN INTERACTIVE DASHBOARD
 # ==============================================================================
-# Task: Complete the loop execution table so selections route correctly.
-# Safe Menu Traps warning: 
-#   If you run strict mode flags, an uncompleted step function might terminate your 
-#   loop prematurely. Safely wrap experimental calls like this: function_name || true
-
 main() {
-    echo "=== Conditionals and Logic Core Dashboard ==="
-    echo ""
-    
     while true; do
-        echo "Select an action profile tool item:"
-        echo "1. Verify target file properties"
-        echo "2. Process string character number validation"
-        echo "3. Query standard network port boundaries"
-        echo "4. Simulate background service platform state"
-        echo "5. Run structural file backup calculation evaluation"
-        echo "6. Run diagnostic environment system validation checklist"
-        echo "7. Check user security configuration context profile"
-        echo "8. Load targeted remote infrastructure deployment profiles"
-        echo "9. Terminate process shell environment execution context"
+        echo "=========================================="
+        echo "     Conditionals & Logic Dashboard       "
+        echo "=========================================="
+        echo "1. Verify File Properties"
+        echo "2. Validate Integer / Port Number"
+        echo "3. Evaluate File Backup Status"
+        echo "4. Audit System Environment"
+        echo "5. Check User Security Context"
+        echo "6. Load Deployment Profile"
+        echo "7. Exit"
         echo ""
-        read -p "Enter selection metric item (1-9): " choice
+        read -p "Select an option (1-7): " choice
         echo ""
         
         case "$choice" in
             1)
-                read -p "Enter literal target path string: " filepath
-                check_file "$filepath"
+                read -p "Enter file path: " fp
+                check_file "$fp"
                 ;;
-            # TODO: Add choices 2 through 8 here matching the execution profiles
-            9)
-                echo "Exiting interface. Processing shutdown sequences... Complete."
+            2)
+                read -p "Enter number/port: " num
+                validate_number_and_port "$num"
+                ;;
+            3)
+                read -p "Enter target path: " fp
+                should_backup "$fp"
+                ;;
+            4)
+                validate_environment
+                ;;
+            5)
+                check_permissions "$USER"
+                ;;
+            6)
+                read -p "Enter environment (dev/staging/prod): " env_choice
+                select_deployment_env "$env_choice"
+                ;;
+            7)
+                echo "Exiting..."
                 exit 0
                 ;;
             *)
-                echo "Invalid configuration token matrix pattern. Re-enter values (1-9)."
+                echo "Invalid selection. Please choose 1-7."
                 ;;
         esac
         echo ""
     done
 }
 
-# ==============================================================================
-# TODO 10: Run Main Function Activation Trigger
-# ==============================================================================
-# Uncomment the initialization block directly below when debugging complete:
+# Uncomment the line below to run interactive menu:
 # main
-
-# ==============================================================================
-# TESTING YOUR SCRIPT
-# ==============================================================================
-# 1. Modify shell attribute flags to allow execution access:
-#    chmod +x 03_conditionals_practice.sh
-#
-# 2. Source the framework code directly into an active terminal window to debug units:
-#    source 03_conditionals_practice.sh
-#    validate_number "100"
-#    check_port "443"
-#
-# 3. Initialize full execution:
-#    ./03_conditionals_practice.sh
-# ==============================================================================
