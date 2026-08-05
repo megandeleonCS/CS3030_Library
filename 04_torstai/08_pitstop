@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-Lab 05: "PitStop" — The F1 CI/CD Automation Pipeline
-Topics: Subprocess execution, quality gates, XML/JSON parsing, HTML generation, artifact creation
+Lab 08: "PitStop" — The F1 CI/CD Automation Pipeline
+Topics: Subprocess execution, quality gates, JSON telemetry, file archiving
 
+LAB OVERVIEW:
 You will implement an automated CI/CD pipeline engine for a Python application. 
 The pipeline executes pre-flight environment checks, linting, automated testing 
-with code coverage enforcement, artifact archiving, JSON telemetry logging, XML coverage 
-parsing, static HTML report generation, and notifications.
+with code coverage enforcement, artifact archiving, JSON telemetry logging, 
+and pipeline status notifications.
 """
 
 import datetime
@@ -15,7 +16,6 @@ import os
 import shutil
 import subprocess
 import sys
-import xml.etree.ElementTree as ET
 import zipfile
 from pathlib import Path
 
@@ -30,33 +30,31 @@ REPORTS_DIR = PROJECT_ROOT / "pipeline_reports"
 # ==============================================================================
 def verify_environment() -> None:
     """
-    Check that required CLI tools exist on system PATH and target directory exists.
-    
+    Check that required CLI tools exist on system PATH and target app directory exists.
+
     Requirements:
-    - Check for tools: 'python3', 'pytest', 'shellcheck', 'pylint', 'black', 'zip'.
-    - Check that the `app/` directory exists.
-    - Print 'PASS' or 'FAIL' for each tool and path check.
-    - If ANY check fails, print a descriptive error message and exit with code 1.
+    - Check for essential tools: 'python3', 'pytest', 'black'.
+    - Check that the `app/` directory exists using Path.is_dir().
+    - Print status ('[PASS]' or '[FAIL]') for each check.
+    - If ANY check fails, raise a RuntimeError with a descriptive message.
     """
-    # TODO: Implement pre-flight checks using shutil.which and Path.exists
+    # TODO: Implement pre-flight checks using shutil.which and Path.is_dir
     pass
 
 
 # ==============================================================================
-# TODO 2: Linting Quality Gate Stage
+# TODO 2: Quality Gate Stage (Linting)
 # ==============================================================================
 def run_lint_stage() -> bool:
     """
-    Execute static analysis checks across shell scripts and Python source code.
-    
+    Execute static analysis checks across Python source code.
+
     Requirements:
-    - Run `shellcheck pipeline_runner.sh` via subprocess.
-    - Run `pylint app/log_analyzer.py --fail-under=7.0` via subprocess.
-    - Run `black --check app/` via subprocess.
-    - Print clear PASS/FAIL status for each individual tool.
-    - Return True if ALL tools pass (exit code 0), or False if any tool fails.
+    - Run `black --check app/` via `subprocess.run()`.
+    - Print stdout/stderr if the check fails.
+    - Return True if black passes (exit code 0), or False if formatting fails.
     """
-    # TODO: Execute subprocess calls for shellcheck, pylint, and black
+    # TODO: Execute subprocess call for black
     pass
 
 
@@ -66,14 +64,14 @@ def run_lint_stage() -> bool:
 def run_test_stage() -> tuple[bool, float]:
     """
     Run pytest with coverage enforcing an 80% line coverage threshold.
-    
+
     Requirements:
-    - Execute: `pytest app/tests/ --cov=app --cov-report=xml --cov-fail-under=80`
-    - Capture subprocess output.
-    - Parse line coverage or check exit code.
+    - Execute: `pytest app/tests/ --cov=app --cov-fail-under=80` via `subprocess.run()`.
+    - Capture the exit code: pytest returns 0 on pass, non-zero on test/cov failure.
+    - Parse or extract the coverage percentage from stdout, or return 0.0 if failed.
     - Return a tuple: (stage_passed: bool, coverage_percentage: float).
     """
-    # TODO: Run pytest subprocess and track pass status & coverage metric
+    # TODO: Run pytest subprocess and return pass status & coverage metric
     pass
 
 
@@ -83,106 +81,59 @@ def run_test_stage() -> tuple[bool, float]:
 def run_build_stage() -> Path:
     """
     Create a clean, timestamped zip release artifact under pipeline_reports/.
-    
+
     Requirements:
-    - Artifact name format: `build_<YYYYMMDD_HHMMSS>.zip`.
+    - Zip artifact name format: `build_<YYYYMMDD_HHMMSS>.zip`.
     - Package the contents of `app/`.
-    - EXCLUDE: `__pycache__`, `*.pyc`, `.pytest_cache`, and `venv/`.
-    - Print the generated zip file path and size (in KB or MB).
-    - Return the Path object pointing to the zip file.
+    - EXCLUDE cache files: `__pycache__`, `*.pyc`, and `.pytest_cache`.
+    - Return the Path object pointing to the generated zip file.
     """
-    # TODO: Create zip archive while filtering out cache files and virtual environments
+    # TODO: Create zip archive while filtering out cache directories using zipfile or shutil
     pass
 
 
 # ==============================================================================
-# TODO 5: Telemetry JSON Logger & Reader
+# TODO 5: Telemetry JSON Logger
 # ==============================================================================
 def generate_pipeline_report(
-    run_id: str, 
-    overall_status: str, 
-    stage_results: dict, 
+    run_id: str,
+    overall_status: str,
+    stage_results: dict,
+    coverage_pct: float,
     output_path: Path = REPORTS_DIR / "latest.json"
-) -> None:
+) -> dict:
     """
     Write build execution metadata to a JSON report file.
-    
+
     Requirements:
-    - Output must include keys: `run_id`, `timestamp`, `overall_status` ('PASS'|'FAIL'), 
-      and `stages` (dictionary of stage names and results).
+    - Construct a dictionary with keys: `run_id`, `timestamp`, `overall_status`,
+      `coverage_percentage`, and `stages` (dictionary of stage names and results).
     - Ensure output directory exists before writing.
+    - Dump dictionary to `output_path` using `json.dump()` with indent=2.
+    - Return the constructed telemetry dictionary.
     """
-    # TODO: Construct telemetry dictionary and dump to JSON file
-    pass
-
-
-def parse_pipeline_results(json_path: Path = REPORTS_DIR / "latest.json") -> dict:
-    """
-    Read and parse a pipeline JSON telemetry report file.
-    
-    Requirements:
-    - If `json_path` does not exist, raise FileNotFoundError.
-    - Parse JSON and return the full dictionary.
-    """
-    # TODO: Open, read, and return parsed JSON data
+    # TODO: Construct telemetry dictionary, save to JSON file, and return dict
     pass
 
 
 # ==============================================================================
-# TODO 6: Coverage XML Parser
+# TODO 6: Summary Report & Event Notifier
 # ==============================================================================
-def analyze_test_coverage(xml_path: Path = PROJECT_ROOT / "coverage.xml") -> dict:
-    """
-    Parse coverage.xml generated by pytest-cov using xml.etree.ElementTree.
-    
-    Requirements:
-    - If file is missing, return `{"error": "Coverage file not found"}`.
-    - Extract overall line coverage rate (0.0 to 100.0%).
-    - Extract list of all analyzed filenames.
-    - Extract list of files falling below 0.80 (80%) line coverage rate.
-    - Return dict: `{"overall_pct": float, "files": list, "below_threshold": list}`
-    """
-    # TODO: Parse XML tree, compute percentages, and build summary dict
-    pass
-
-
-# ==============================================================================
-# TODO 7: HTML Dashboard Report Generator
-# ==============================================================================
-def generate_html_report(
-    telemetry_data: dict, 
-    coverage_data: dict, 
-    output_path: Path = REPORTS_DIR / "index.html"
+def generate_summary_and_notify(
+    telemetry: dict,
+    log_channel: Path = REPORTS_DIR / "notifications.log",
+    summary_path: Path = REPORTS_DIR / "summary.md"
 ) -> None:
     """
-    Build a standalone static HTML report page for the build run.
-    
-    Requirements:
-    - Include status banner (PASS / FAIL) styled dynamically.
-    - Include stage execution table.
-    - Include coverage metrics section.
-    - Use inline CSS (zero external dependencies/CDNs).
-    """
-    # TODO: Construct HTML string and write to file
-    pass
+    Generate a clean Markdown summary and append event notifications to a log file.
 
-
-# ==============================================================================
-# TODO 8: Event Notifier
-# ==============================================================================
-def send_notification(
-    status: str, 
-    stage_name: str, 
-    channel_file: Path = REPORTS_DIR / "notifications.log"
-) -> None:
-    """
-    Append build event records to a log channel file.
-    
     Requirements:
-    - Format: `[<ISO_TIMESTAMP>] Pipeline <STATUS> - Stage: <STAGE_NAME>`
-    - Must APPEND to the file without overwriting existing entries.
+    - Append entry to `notifications.log`:
+      `[<ISO_TIMESTAMP>] Pipeline <OVERALL_STATUS> - Run ID: <RUN_ID>`
+    - Write a clean Markdown file (`summary.md`) detailing the overall status,
+      coverage score, and a table of individual stage results.
     """
-    # TODO: Format log entry and append to channel file
+    # TODO: Format Markdown report, write summary file, and append to log channel
     pass
 
 
@@ -192,45 +143,44 @@ def send_notification(
 if __name__ == "__main__":
     print("🏎️ Executing 'PitStop' CI/CD Pipeline Engine...")
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    
+
     run_id = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     stages = {}
     overall_status = "PASS"
+    coverage_pct = 0.0
 
     try:
         print("\n[Stage 0] Pre-Flight System Checks...")
         verify_environment()
+        stages["preflight"] = "PASS"
 
-        print("\n[Stage 1] Running Linting Gate...")
+        print("\n[Stage 1] Running Quality Gate (Linting)...")
         lint_pass = run_lint_stage()
         stages["lint"] = "PASS" if lint_pass else "FAIL"
         if not lint_pass:
-            overall_status = "FAIL"
+            raise RuntimeError("Linting quality gate failed.")
 
-        print("\n[Stage 2] Running Automated Tests & Coverage Gate...")
-        test_pass, cov_pct = run_test_stage()
+        print("\n[Stage 2] Running Automated Tests & Coverage...")
+        test_pass, coverage_pct = run_test_stage()
         stages["test"] = "PASS" if test_pass else "FAIL"
         if not test_pass:
-            overall_status = "FAIL"
+            raise RuntimeError("Test suite or coverage threshold failed.")
 
         print("\n[Stage 3] Packaging Build Artifacts...")
         artifact_path = run_build_stage()
         stages["build"] = "PASS" if artifact_path.exists() else "FAIL"
 
     except Exception as e:
-        print(f"\n Unhandled pipeline error: {e}", file=sys.stderr)
+        print(f"\n❌ Pipeline failed: {e}", file=sys.stderr)
         overall_status = "FAIL"
 
     finally:
         print("\n[Stage 4] Generating Telemetry & Reports...")
-        generate_pipeline_report(run_id, overall_status, stages)
-        
-        cov_summary = analyze_test_coverage()
-        telemetry = parse_pipeline_results()
-        
-        generate_html_report(telemetry, cov_summary)
-        send_notification(overall_status, "pipeline_completion")
+        telemetry_data = generate_pipeline_report(
+            run_id, overall_status, stages, coverage_pct
+        )
+        generate_summary_and_notify(telemetry_data)
 
-        print(f"\n Pipeline execution completed with status: {overall_status}")
+        print(f"\n🏁 Pipeline execution completed with status: {overall_status}")
         if overall_status == "FAIL":
             sys.exit(1)

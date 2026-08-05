@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Lab 04: "Kimi" — The F1 Provisioning Agent
-Topics: File system automation, environment templating, POSIX permissions, subprocesses
+Lab 07: "Kimi" — The F1 Provisioning Agent
+Topics: File system automation, string formatting, POSIX permissions, subprocesses
 
 LAB OVERVIEW:
 You are building an automated workspace provisioning script. The script must:
 1. Safely initialize a clean local sandbox directory layout.
-2. Deploy dynamic configuration files using string template interpolation.
+2. Deploy dynamic configuration files using string interpolation.
 3. Enforce strict Unix security permissions on generated assets.
-4. Check for system dependencies using subprocesses and handle missing tools.
+4. Verify system dependencies via CLI checks and handle missing tools gracefully.
 """
 
 import os
@@ -17,7 +17,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-SANDBOX_DIR = Path("/tmp/kimi_sandbox")
+# Per-user sandbox path prevents multi-tenant collision issues
+SANDBOX_DIR = Path(f"/tmp/kimi_sandbox_{os.getuid()}")
 
 
 # ==============================================================================
@@ -26,17 +27,18 @@ SANDBOX_DIR = Path("/tmp/kimi_sandbox")
 def create_sandbox_layout(base_path: Path = SANDBOX_DIR) -> None:
     """
     Ensure a fresh workspace directory exists at `base_path`.
-    
+
     Requirements:
-    - If `base_path` already exists, safely recursively remove it (shutil.rmtree).
-    - Construct the following directory tree:
+    - If `base_path` exists, restore write permissions on directories first 
+      (to handle re-runs where permissions were locked), then recursively 
+      remove it using `shutil.rmtree()`.
+    - Construct the following directory tree using `Path.mkdir()`:
         <base_path>/
         ├── config/
         ├── logs/
         └── dev_workspace/
-    - Use pathlib.Path or os.makedirs cleanly.
     """
-    # TODO: Implement clean wipe and directory tree generation
+    # TODO: Implement safe cleanup (resetting write perms if needed) and directory tree generation
     pass
 
 
@@ -46,17 +48,17 @@ def create_sandbox_layout(base_path: Path = SANDBOX_DIR) -> None:
 def deploy_config_template(config_dir: Path = SANDBOX_DIR / "config") -> None:
     """
     Generate a dynamic service configuration file at `<config_dir>/service.conf`.
-    
+
     Requirements:
-    - Create a base template string containing placeholders:
-      `{{USER}}`, `{{PORT}}`, and `{{ENV}}`.
-    - Retrieve system realities:
-      - `{{USER}}`: Current system username (e.g., via os.getlogin() or getpass.getuser()).
-      - `{{PORT}}`: Default to "8080" unless 'KIMI_PORT' exists in os.environ.
-      - `{{ENV}}`: Default to "development".
-    - Replace all placeholders with actual values and write the result to `service.conf`.
+    - Define a configuration string template containing placeholders:
+      `{USER}`, `{PORT}`, and `{ENV}`.
+    - Retrieve system environment realities:
+      - `{USER}`: Current system username via `os.getenv("USER")` or `os.getlogin()`.
+      - `{PORT}`: Value of environment variable 'KIMI_PORT' if set, otherwise "8080".
+      - `{ENV}`: Value of environment variable 'KIMI_ENV' if set, otherwise "development".
+    - Populate the template and write the result to `service.conf` using `Path.write_text()`.
     """
-    # TODO: Read/define template, replace placeholders, and write to file
+    # TODO: Fetch environment variables, format the template, and write to file
     pass
 
 
@@ -65,17 +67,18 @@ def deploy_config_template(config_dir: Path = SANDBOX_DIR / "config") -> None:
 # ==============================================================================
 def enforce_permissions(sandbox_path: Path = SANDBOX_DIR) -> None:
     """
-    Secure the sandbox environment using POSIX file permissions (os.chmod).
-    
-    NOTE: Run this AFTER configuration files are written to avoid write-block errors!
-    
+    Secure the sandbox environment using POSIX file permissions (`Path.chmod`).
+
+    NOTE: Run this AFTER configuration files are written!
+
     Requirements:
-    - Set `<sandbox_path>/config/` directory to Owner Read/Execute ONLY (0o500).
-    - Set `<sandbox_path>/logs/` directory to Owner Read/Write/Execute (0o700).
-    - Verify applied permissions programmatically using `os.stat()` and print 
-      the octal permission string (e.g., '0o500') to stdout for confirmation.
+    - Set `<sandbox_path>/config/` directory to Owner Read/Execute ONLY (`0o500`).
+    - Set `<sandbox_path>/logs/` directory to Owner Read/Write/Execute (`0o700`).
+    - Verify applied permissions programmatically: read the permission bits 
+      using `sandbox_path.stat().st_mode` and print the octal string 
+      (e.g., oct(path.stat().st_mode & 0o777)) to stdout for confirmation.
     """
-    # TODO: Use os.chmod to set octal permissions and verify via os.stat
+    # TODO: Use Path.chmod to set octal permissions and print verification stats
     pass
 
 
@@ -83,24 +86,22 @@ def enforce_permissions(sandbox_path: Path = SANDBOX_DIR) -> None:
 # TODO 4: Dependency Provisioner
 # ==============================================================================
 class ProvisioningError(Exception):
-    """Custom exception raised when system dependency installation fails."""
+    """Custom exception raised when system dependencies are missing."""
     pass
 
 
-def provision_dependencies(tool_name: str = "shellcheck") -> bool:
+def check_dependency(tool_name: str = "shellcheck") -> bool:
     """
     Verify if a required CLI tool exists on the host system PATH.
-    
+
     Requirements:
     - Check if `tool_name` exists using `shutil.which(tool_name)`.
-    - If found, print a success message and return True.
-    - If missing:
-        - Attempt an installation subprocess command based on available manager 
-          (e.g., `apt-get install -y`, `brew install`, or `apk add`).
-        - If installation fails or package manager is unsupported, raise `ProvisioningError`
-          with a descriptive message.
+    - If found, run `<tool_name> --version` using `subprocess.run()`, 
+      capture standard output, print a success message, and return True.
+    - If missing, raise `ProvisioningError` detailing that `tool_name` 
+      is missing along with instructions to install it manually.
     """
-    # TODO: Check executable presence and handle automated fallback installation
+    # TODO: Verify tool existence, execute a version check via subprocess, or raise error
     pass
 
 
@@ -120,9 +121,9 @@ if __name__ == "__main__":
         enforce_permissions()
 
         print("[4/4] Verifying system dependencies...")
-        provision_dependencies("shellcheck")
+        check_dependency("shellcheck")
 
-        print("Environment successfully provisioned!")
+        print("✨ Environment successfully provisioned!")
     except Exception as e:
-        print(f" Provisioning failed: {e}", file=sys.stderr)
+        print(f"❌ Provisioning failed: {e}", file=sys.stderr)
         sys.exit(1)
