@@ -8,12 +8,18 @@ Tiistai
 02_file_system_practice
 keskiviikko
 03_conditionals_practice
-04_wildcards
+
 torstai
+04_wildcards
 05_nokia_monitor
-01_tram_log
+06_tram_log
 perjantai
-01_sandbox
-02_pitstop
+07_sandbox
+08_pitstop
+09_artic
 own_script
-05_optional_git_lab
+10_optional_git_lab
+
+
+Bash Skills
+https://www.w3schools.com/bash/bash_quiz.php

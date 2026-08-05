@@ -1,0 +1,121 @@
+#!/usr/bin/env python3
+"""
+Lab 09: "Arctic Storm" — Defensive Weather Alert Pipeline
+Topics: Secret management (.env), exception handling, logging module, REST APIs
+
+LAB OVERVIEW:
+This is a highly defensive scripting exercise. You will request live or mock weather 
+alert data. Your script must assume everything can fail: missing keys, network 
+outages, malformed JSON, and rate limits. Every event must log correctly to file 
+and stdout.
+"""
+
+import logging
+import os
+import sys
+from pathlib import Path
+
+# Optional: requests library or standard urllib
+import requests
+
+# Base Paths
+PROJECT_ROOT = Path(__file__).resolve().parent
+LOGS_DIR = PROJECT_ROOT / "logs"
+
+
+# ==============================================================================
+# TODO 1: Setup Logging Architecture
+# ==============================================================================
+def setup_defensive_logging() -> logging.Logger:
+    """
+    Set up a structured Python logger.
+
+    Requirements:
+    - Ensure `LOGS_DIR` exists (`Path.mkdir(exist_ok=True)`).
+    - Configure logger to output:
+      - Console (StreamHandler): Level INFO
+      - Log File (`logs/arctic_errors.log`): Level DEBUG
+    - Include timestamps, log levels, and messages in log formatting:
+      `%(asctime)s [%(levelname)s] %(message)s`
+    - Return the configured `Logger` object.
+    """
+    # TODO: Create logs/ folder and configure stream & file handlers
+    pass
+
+
+# ==============================================================================
+# TODO 2: Secret Management & .env Bootstrapping
+# ==============================================================================
+def load_secrets() -> str:
+    """
+    Retrieve API key securely from environment or local `.env` file.
+
+    Requirements:
+    - Look for a local `.env` file in `PROJECT_ROOT`. If present, parse lines 
+      to populate missing environment variables.
+    - Fetch `ARCTIC_API_KEY` from `os.environ`.
+    - If missing or empty:
+      - Log a WARNING message ("ARCTIC_API_KEY missing. Falling back to MOCK_KEY.").
+      - Return "MOCK_KEY".
+    - Return the retrieved key string.
+    """
+    # TODO: Parse .env or environment variables with fallback logic
+    pass
+
+
+# ==============================================================================
+# TODO 3: API Request with Strict Failure Backoffs
+# ==============================================================================
+class FMIAPIError(Exception):
+    """Custom exception raised when weather API returns an invalid state."""
+    pass
+
+
+def query_weather_api(api_key: str, endpoint: str = "https://opendata.fmi.fi/wfs") -> dict:
+    """
+    Fetch weather alert data with defensive network exception handling.
+
+    Requirements:
+    - Execute a GET request with a strict 3.0 second timeout limit.
+    - Catch network failure exceptions (`requests.exceptions.Timeout`, 
+      `requests.exceptions.ConnectionError`, `requests.exceptions.RequestException`).
+    - If the API returns a non-200 HTTP status code, raise `FMIAPIError` 
+      with the HTTP status code in the error message.
+    - Return the parsed JSON response dictionary.
+    """
+    # TODO: Implement timeout-bounded request and map network failures to FMIAPIError
+    pass
+
+
+# ==============================================================================
+# TODO 4: The Graceful Degrader & Pipeline Driver
+# ==============================================================================
+def run_defensive_pipeline() -> dict:
+    """
+    Execute the alert pipeline using try-except-finally blocks for absolute uptime.
+
+    Requirements:
+    - Call `setup_defensive_logging()` and `load_secrets()`.
+    - Attempt to fetch live data using `query_weather_api()`.
+    - If `FMIAPIError` or JSON parsing error occurs:
+      - Log an ERROR message with context.
+      - Fall back to a local fallback dictionary: 
+        `{"status": "DEGRADED", "alert": "Cached Warning: High Winds"}`.
+    - Use a `finally:` block to log pipeline execution completion regardless of outcome.
+    - Return final data dictionary (live payload or fallback payload).
+    """
+    # TODO: Combine execution steps in robust try-except-finally structure
+    pass
+
+
+# ==============================================================================
+# PIPELINE EXECUTION ENGINE
+# ==============================================================================
+if __name__ == "__main__":
+    print("❄️ Executing 'Arctic Storm' Defensive Alert Pipeline...")
+    try:
+        data = run_defensive_pipeline()
+        print(f"\nPipeline Output Payload:\n{data}")
+    except Exception as e:
+        print(f"\n❌ Unhandled Fatal Failure: {e}", file=sys.stderr)
+        sys.exit(1)

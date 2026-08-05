@@ -1,0 +1,97 @@
+Bash-to-Python Data Handshake: Quick Reference
+When building hybrid CLI scripts, Bash handles the environment and file streams,
+while Python handles complex logic and parsing. Below are the three standard patterns
+for passing data from Bash into Python.
+
+Pattern 1: Command-Line Arguments (Flags & Input Options)
+Best Used For: Passing short strings, flags, file paths, or user options.
+
+Bash Script (run.sh)
+
+Bash
+#!/usr/bin/env bash
+USER_ENV="production"
+PORT_NUM="8080"
+
+# Pass data as positional arguments
+python3 process.py "$USER_ENV" "$PORT_NUM"
+Python Script (process.py)
+
+Python
+#!/usr/bin/env python3
+import sys
+
+# sys.argv[0] is the script name; sys.argv[1...] are arguments
+if len(sys.argv) < 3:
+    print("Error: Missing arguments.", file=sys.stderr)
+    sys.exit(1)
+
+env_type = sys.argv[1]
+port = int(sys.argv[2])
+
+print(f"Deploying to {env_type} on port {port}")
+
+Pattern 2: Standard Input / Pipe (stdin)
+Best Used For: Streaming command outputs (grep, cat, curl, awk)
+directly into Python without writing to disk.
+
+Bash Script (run.sh)
+
+Bash
+#!/usr/bin/env bash
+
+# Pipe system information directly into Python
+df -h | python3 analyze_disk.py
+Python Script (analyze_disk.py)
+
+Python
+#!/usr/bin/env python3
+import sys
+
+# Read line-by-line from standard input stream
+for line in sys.stdin:
+    if "G" in line:  # Example filtering logic
+        print(f"High-capacity drive entry: {line.strip()}")
+
+Pattern 3: Temporary Files or Structured Data Transfers
+Best Used For: Large multi-line payloads, complex JSON structures, or when state needs to persist
+across multiple execution stages.
+
+Bash Script (run.sh)
+
+Bash
+#!/usr/bin/env bash
+TEMP_FILE="/tmp/system_metrics.json"
+
+# Collect system data and save to a structured temporary file
+echo '{"status": "WARNING", "cpu_usage": 92.4, "disk_free_gb": 4}' > "$TEMP_FILE"
+
+# Pass the file path to Python for processing
+python3 parse_report.py "$TEMP_FILE"
+
+# Clean up temporary artifacts when finished
+rm -f "$TEMP_FILE"
+Python Script (parse_report.py)
+
+Python
+#!/usr/bin/env python3
+import json
+import sys
+from pathlib import Path
+
+file_path = Path(sys.argv[1])
+
+if file_path.exists():
+    data = json.loads(file_path.read_text())
+    if data.get("cpu_usage", 0) > 90:
+        print(f"ALERT: High CPU utilization detected: {data['cpu_usage']}%")
+
+Quick Pattern Breakdown
+Command-Line Arguments: Best for very low data volumes (under 1 KB). Keeps memory usage minimal.
+Ideal for config flags, usernames, target directories, and short parameters. 
+Standard Input Pipes (stdin): Best for medium-to-high data volumes.
+   Keeps memory usage low by streaming line-by-line.
+Ideal for continuous log streams and command outputs (grep/curl).
+Temporary Files: Best for high data volumes (megabytes or more).
+   Requires medium memory usage to write and parse state.
+Ideal for structured JSON/CSV objects, multi-stage reports, and audit trails.
