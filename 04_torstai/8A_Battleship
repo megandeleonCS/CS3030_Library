@@ -1,0 +1,38 @@
+INSTRUCTIONS
+Create a simple game using pre-defined functions such as Random, and Sqrt.  
+
+Description
+
+Create a modified Battleship game.  Your job is to "Hide" a submarine in a 10x10 grid.  You will then allow the user to guess where to drop the missile. The program will report the distance between the submarine x and y coordinate, and the user's x and y guess.  The user will guess again until they find the submarine or run out of missiles.  They have 10 missiles to try to hit the submarine, otherwise, the submarine gets away.  
+
+Create a random number for the x and y coordinates of the submarine between 1 and 10.
+
+Allow the program to repeat until the user hits the submarine or they are out of missiles
+
+Allow the user to guess the coordinate
+
+Calculate the Euclidean distance between their guess and the coordinates of the submarine.
+
+Report that they have a Miss and show the distance, Hit and end the game, or that the submarine got away and end the game.
+
+Calculate distance information.Links to an external site.
+
+ 
+
+Sample Run
+
+Sub Hunt
+
+Enter X coordinate: 5
+Enter Y coordinate: 5
+Miss:   2.24 meters away: 9  missiles remaining
+Enter X coordinate: 7
+Enter Y coordinate: 5
+Miss:   4.12 meters away: 8  missiles remaining
+Enter X coordinate: 3
+Enter Y coordinate: 5
+Miss:   1.0 meters away: 7  missiles remaining
+Enter X coordinate: 2
+Enter Y coordinate: 5
+Miss:   1.41 meters away: 6  missiles remaining
+Enter X coordinate: 3 Enter Y coordinate: 4 Hit
