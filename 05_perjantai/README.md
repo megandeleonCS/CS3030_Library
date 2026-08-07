@@ -38,4 +38,9 @@ Architecture Flowchart. Show your diagram and explain the data flow.
 The Handshake Demo. Show the exact line of code, CLI flag, pipe, or temporary file format where Bash hands off data to Python.
 Execution. Run the script live using different parameters or mock inputs.
 
-Ideas:
+# Ideas:
+Automate the Boring Stuff https://automatetheboringstuff.com/
+https://github.com/wasmerio/Python-Scripts
+https://github.com/mahmoud/awesome-python-applications
+https://github.com/agarrharr/awesome-cli-apps
+https://github.com/lukasmasuch/best-of-python
